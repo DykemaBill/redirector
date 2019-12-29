@@ -24,10 +24,17 @@ def config_file_read():
     try:
         with open(config_file + '.json', 'r') as json_file:
             json_data = json.loads(json_file.read())
+            global redirector_logo
+            global redirector_team
+            global redirector_email
+            redirector_logo = json_data['logo']
+            redirector_team = json_data['team']
+            redirector_email = json_data['email']
             for dataread_record in json_data['redirects']:
                 dataread_records.append(JSONRead(**dataread_record))
     except IOError as e:
         print ('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
+        global config_error
         config_error = True
 
 config_file_read()
@@ -38,14 +45,14 @@ app = Flask(__name__)
 # Root page about
 @app.route('/')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Configuration page
 @app.route('/config')
 def config():
     if config_error == True:
-        return render_template('config_error.html', cfgfile=config_file + '.json')
-    return render_template('config.html', redirect_records=dataread_records)
+        return render_template('config_error.html', cfgfile=config_file + '.json', logo=redirector_logo, team=redirector_team, email=redirector_email)
+    return render_template('config.html', redirect_records=dataread_records, logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
@@ -130,7 +137,7 @@ def save(redirectindex):
 # Maintenance template page
 @app.route('/maint')
 def maint():
-    return render_template('maintenance.html')
+    return render_template('maintenance.html', logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Captures routes as defined in configuration file or if not deliver error page
 @app.route('/<path:otherpath>')
@@ -148,7 +155,7 @@ def redirectfrom(otherpath):
                 else:
                     logging.info(request.remote_addr + ' ==> direct: ' + redirect_route.redirectto)
                     return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
-    return render_template('error.html', bad_path=otherpath)
+    return render_template('error.html', bad_path=otherpath, logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Run in debug mode if started from CLI
 if __name__ == '__main__':

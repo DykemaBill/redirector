@@ -1,14 +1,7 @@
 {
-    "otherstuff": [
-        {
-            "not using 1": "not using",
-            "not using 2": "not using"
-        },
-        {
-            "not using 1": "not using",
-            "not using 2": "not using"
-        }
-    ],
+    "logo": "https://www.nasa.gov/sites/default/files/styles/side_image/public/thumbnails/image/nasa-logo-web-rgb.png",
+    "team": "Platform Team",
+    "email": "redirector@dykema.org",
     "redirects": [
         {
             "_index": 0,
