@@ -1,0 +1,35 @@
+{
+    "otherstuff": [
+        {
+            "not using 1": "not using",
+            "not using 2": "not using"
+        },
+        {
+            "not using 1": "not using",
+            "not using 2": "not using"
+        }
+    ],
+    "redirects": [
+        {
+            "_index": 0,
+            "embed": false,
+            "maintenance": true,
+            "redirectfrom": "linkpath/part/apple",
+            "redirectto": "http://apple.com"
+        },
+        {
+            "_index": 1,
+            "embed": true,
+            "maintenance": false,
+            "redirectfrom": "linkpath/part/google",
+            "redirectto": "http://google.com"
+        },
+        {
+            "_index": 2,
+            "embed": false,
+            "maintenance": false,
+            "redirectfrom": "linkpath/part/microsoft",
+            "redirectto": "http://microsoft.com"
+        }
+    ]
+}

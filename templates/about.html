@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Redirector Server</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styling.css') }}">
+</head>
+<body>
+    <font face="arial">
+        <div class="wrapper">
+    
+                <img src="https://www.nasa.gov/sites/default/files/styles/side_image/public/thumbnails/image/nasa-logo-web-rgb.png?itok=uDhKSTb1">
+    
+            <div>
+                
+                <center>
+                    <H1>Redirector Server</H1>
+                
+                    <h3><p>Date: <span id="datetime"></span></p>
+                    <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
+                </center>
+    
+            </div>
+    
+            <div>
+    
+                This server directs requests to the correct server.
+    
+            </div>
+    
+            <div>
+    
+                <h3>Platform Team</h3>
+    
+            </div>
+    
+        </div>
+    </font>
+</body>
+</html>

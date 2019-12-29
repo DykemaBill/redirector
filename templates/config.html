@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Redirector Server</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styling.css') }}">
+    <style>
+        .formarea{
+            background:rgb(215, 215, 215);
+            padding:1em;
+            max-width: 1000px;
+        }
+        .addr{
+            border: none;
+            color: white;
+            padding: 7px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .prod{
+            background-color: rgb(80, 181, 83);
+        }
+        .maint{
+            background-color: rgb(217, 79, 79);
+        }
+        .new{
+            background-color: rgb(158, 166, 158);
+        }
+        .select_no{
+            color: rgb(190, 190, 190);
+            background-color: rgb(154, 158, 105);
+            border-radius: 8px;
+        }
+        .select_yes{
+            background-color: rgb(164, 175, 12);
+            border-radius: 8px;
+        }
+        .saved{
+            color: rgb(190, 190, 190);
+            background-color: rgb(124, 130, 137);
+            border-radius: 12px;
+        }
+        .save{
+            background-color: rgb(31, 86, 163);
+            border-radius: 12px;
+        }
+        .del{
+            background-color: rgb(195, 124, 9);
+            border-radius: 12px;
+        }
+        .dis{
+            color: rgb(190, 190, 190);
+            background-color: rgb(183, 147, 90);
+            border-radius: 12px;
+        }
+        /* Hide the browser's default checkbox */
+        /* .checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        } */
+        /* a:link {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+        }
+        a:visited {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+        } */
+    </style>
+</head>
+<body>
+
+    <script type="text/javascript">
+
+        // When the redirect from field is clicked enable save button and disable delete button
+        function fromClicked(element) {
+
+            // Enable the save button
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+            // Disable the delete button
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+        }
+
+        // When the redirect to field is clicked enable save button and disable delete button
+        function toClicked(element) {
+
+            // Enable the save button
+            element.previousElementSibling.previousElementSibling.classList.remove("saved");
+            element.previousElementSibling.previousElementSibling.classList.add("save");
+
+            // Disable the delete button
+            element.previousElementSibling.classList.remove("del");
+            element.previousElementSibling.classList.add("dis");
+
+        }
+
+        // When an embedded button is clicked toggle
+        function embeddedClicked(element) {
+
+            // Toggle the embedded button
+            element.classList.toggle("select_no");
+            element.classList.toggle("select_yes");
+
+            // Enable the save button
+            element.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+            element.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+            // Disable the delete button
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+            element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+        }
+
+        // When a maintenance button is clicked toggle
+        function maintClicked(element) {
+
+            // Toggle the maintenance button
+            element.classList.toggle("select_no");
+            element.classList.toggle("select_yes");
+
+            // Toggle the redirect to field
+            element.previousElementSibling.classList.toggle("prod");
+            element.previousElementSibling.classList.toggle("maint");
+
+            // Toggle the redirect from field
+            element.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.toggle("prod");
+            element.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.toggle("maint");
+
+            // Enable the save button
+            element.previousElementSibling.previousElementSibling.previousElementSibling.classList.remove("saved");
+            element.previousElementSibling.previousElementSibling.previousElementSibling.classList.add("save");
+
+            // Disable the delete button
+            element.previousElementSibling.previousElementSibling.classList.remove("del");
+            element.previousElementSibling.previousElementSibling.classList.add("dis");
+
+        }
+    
+    </script>
+
+    <font face="arial">
+    <div class="wrapper">
+
+            <img src="https://www.nasa.gov/sites/default/files/styles/side_image/public/thumbnails/image/nasa-logo-web-rgb.png?itok=uDhKSTb1">
+
+        <div>
+            
+            <center>
+                <H1>Redirector Server</H1>
+            
+                <h3><p>Date: <span id="datetime"></span></p>
+                <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
+            </center>
+
+        </div>
+
+        <div>
+
+            <h2>Configured Redirects</h2>
+
+            {% for redirectitem in redirect_records %}
+            <div class="formarea">
+
+                <form action="/save/{{ redirectitem['_index'] }}" method="post">
+                
+                {{ request.host_url }}
+                {% if redirectitem['maintenance'] == False %}
+                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr prod" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                {% else %}
+                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr maint" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                {% endif %}
+
+                {% if redirectitem['embed'] == False %}
+                <label class="addr select_no checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed">Embedded</label><br><br>
+                {% else %}
+                <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked" name="redirectTargetEmbed">Embedded</label><br><br>
+                {% endif %}
+
+                <button class="addr saved">Save</button>
+                <a href="#" class="addr dis" role="button">Delete</a>
+
+                redirects to
+                {% if redirectitem['maintenance'] == False %}
+                <input type="text" value="{{ redirectitem['redirectto'] }}" name="redirectTargetInput" class="addr prod" required style="text-align: left; width:61%" onclick="toClicked(this)">
+                <label class="addr select_no checkbox" onclick="maintClicked(this)"><input type="checkbox" name="redirectTargetMaint">Maintenance</label>
+                {% else %}
+                <input type="text" value="{{ redirectitem['redirectto'] }}" name="redirectTargetInput" class="addr maint" required style="text-align: left; width:61%" onclick="toClicked(this)">
+                <label class="addr select_yes checkbox" onclick="maintClicked(this)"><input type="checkbox" name="redirectTargetMaint" checked="checked">Maintenance</label>
+                {% endif %}
+
+                </form>
+            </div><br>
+            {% endfor %}
+
+            <div class="formarea">
+
+                <form action="/save/new" method="post">
+                
+                {{ request.host_url }}
+                <input type="text" name="redirectSourceInput" class="addr new" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+
+                <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked">Embedded</label><br><br>
+
+                <button class="addr saved">Save</button>
+                <a href="#" class="addr dis" role="button">Delete</a>
+
+                redirects to
+                <input type="text" name="redirectTargetInput" class="addr new" required style="text-align: left; width:61%" onclick="toClicked(this)">
+                <label class="addr select_no checkbox" onclick="maintClicked(this)"><input type="checkbox" name="redirectTargetMaint">Maintenance</label>
+
+                </form>
+            </div><br>
+
+        </div>
+
+        <div>
+
+            <h3>Contact the Platform Team for questions at <a href="mailto: redirector@dykema.org">Platform Support</a></h3>
+
+        </div>
+
+    </div>
+    </font>
+</body>
+</html>
