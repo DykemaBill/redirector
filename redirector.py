@@ -32,7 +32,7 @@ def config_file_read():
             redirector_email = json_data['email']
             for dataread_record in json_data['redirects']:
                 dataread_records.append(JSONRead(**dataread_record))
-    except IOError as e:
+    except IOError:
         print ('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
         global config_error
         config_error = True
@@ -95,38 +95,34 @@ def save(redirectindex):
     try:
         with open(config_file + '.json', 'r') as json_file:
             dataupdate_json = json.load(json_file)
-    except IOError as e:
+    except IOError:
         print ('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
         config_error = True
 
     # Create backup of configuration file
     try:
         with open(config_file + '_old.json', 'w') as json_file:
-            json.dump(dataupdate_json, json_file, sort_keys=True, indent=4)
-    except IOError as e:
+            json.dump(dataupdate_json, json_file, indent=4)
+    except IOError:
         print ('Problem creating to ' + config_file + '_old.json, check to make sure your filesystem is not write protected.')
         config_error = True
-
-    print(dataupdate_json['redirects'][redirectindex]) # Troubleshooting line
-    # Remove updated record and add it back with new values
-    # dataupdate_json['redirects'].pop(redirectindex) #This line is removing the wrong record
-    # dataupdate_json['redirects'].append(dataupdate_newrecord)
 
     # Replace updated record - STILL NEED TO GET INDEXES WORKING CORRECTLY
     dataupdate_jsonedit = []
     for dataupdate_existingrecord in dataupdate_json['redirects']:
-        print ('Check to see if this index item of ' + dataupdate_existingrecord['redirects']['_index'] + ' is equal to ' + redirectindex)
-        dataupdate_existingrecord['redirects']['_index']
-        if dataupdate_existingrecord['redirects']['_index'] == redirectindex:
-            dataupdate_jsonedit['redirects'].append(dataupdate_newrecord)
+        if dataupdate_existingrecord['_index'] == redirectindex:
+            dataupdate_jsonedit.append(dataupdate_newrecord)
         else:
-            dataupdate_jsonedit['redirects'].append(dataupdate_existingrecord)
+            dataupdate_jsonedit.append(dataupdate_existingrecord)
+
+    # Assemble updated configuration file
+    configupdate_jsonedit = {'email': redirector_email, 'logo': redirector_logo, 'team': redirector_team, 'redirects': dataupdate_jsonedit}
 
     # Write updated configuration file
     try:
         with open(config_file + '.json', 'w') as json_file:
-            json.dump(dataupdate_jsonedit, json_file, sort_keys=True, indent=4)
-    except IOError as e:
+            json.dump(configupdate_jsonedit, json_file, indent=4)
+    except IOError:
         print ('Problem writing to ' + config_file + '.json, check to make sure your configuration file is not write protected.')
         config_error = True
 
