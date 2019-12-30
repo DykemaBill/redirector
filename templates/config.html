@@ -206,7 +206,7 @@
 
             <div class="formarea">
 
-                <form action="/save/new" method="post">
+                <form action="/save/{{ redirect_records|length }}" method="post">
                 
                 {{ request.host_url }}
                 <input type="text" name="redirectSourceInput" class="addr new" required style="text-align: left; width:69%" onclick="fromClicked(this)">

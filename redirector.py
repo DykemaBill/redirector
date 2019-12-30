@@ -76,11 +76,19 @@ def save(redirectindex):
     
     print('New path from is ' + redirectfromSave + ' going to ' + redirecttoSave)
 
-    # Read new configuration values into array for page
-    dataread_records[redirectindex].redirectfrom = redirectfromSave
-    dataread_records[redirectindex].redirectto = redirecttoSave
-    dataread_records[redirectindex].embed = embedSave
-    dataread_records[redirectindex].maintenance = maintenanceSave
+    # Read new configuration values into array for page - NEED TO APPEND THE FOLLOWING WHEN NEW RECORD
+    if redirectindex < len(dataread_records): # Not adding new record
+        print ('Not adding a new record')
+        dataread_records[redirectindex].redirectfrom = redirectfromSave
+        dataread_records[redirectindex].redirectto = redirecttoSave
+        dataread_records[redirectindex].embed = embedSave
+        dataread_records[redirectindex].maintenance = maintenanceSave
+    else: # We are addding a new record
+        print ('We are adding a new record')
+        dataread_records[redirectindex].redirectfrom = redirectfromSave
+        dataread_records[redirectindex].redirectto = redirecttoSave
+        dataread_records[redirectindex].embed = embedSave
+        dataread_records[redirectindex].maintenance = maintenanceSave
 
     # Write the new record for the config file
     dataupdate_newrecord = {
@@ -107,13 +115,17 @@ def save(redirectindex):
         print ('Problem creating to ' + config_file + '_old.json, check to make sure your filesystem is not write protected.')
         config_error = True
 
-    # Replace updated record - STILL NEED TO GET INDEXES WORKING CORRECTLY
+    # Replace updated record or add new record
     dataupdate_jsonedit = []
     for dataupdate_existingrecord in dataupdate_json['redirects']:
-        if dataupdate_existingrecord['_index'] == redirectindex:
+        if redirectindex < len(dataread_records): # Not adding new record
+            if dataupdate_existingrecord['_index'] == redirectindex:
+                dataupdate_jsonedit.append(dataupdate_newrecord)
+            else:
+                dataupdate_jsonedit.append(dataupdate_existingrecord)
+        else: # We are addding a new record
+            dataupdate_jsonedit = dataupdate_json['redirects']
             dataupdate_jsonedit.append(dataupdate_newrecord)
-        else:
-            dataupdate_jsonedit.append(dataupdate_existingrecord)
 
     # Assemble updated configuration file
     configupdate_jsonedit = {'email': redirector_email, 'logo': redirector_logo, 'team': redirector_team, 'redirects': dataupdate_jsonedit}
