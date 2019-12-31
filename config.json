@@ -32,7 +32,7 @@
         },
         {
             "_index": 4,
-            "embed": false,
+            "embed": true,
             "maintenance": false,
             "redirectfrom": "linkpath/part/facebook",
             "redirectto": "http://facebook.com"

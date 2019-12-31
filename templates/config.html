@@ -188,8 +188,8 @@
                 <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked" name="redirectTargetEmbed">Embedded</label><br><br>
                 {% endif %}
 
-                <button class="addr saved">Save</button>
-                <a href="#" class="addr dis" role="button">Delete</a>
+                <button class="addr saved" name="submit" value="save">Save</button>
+                <button class="addr dis" name="submit" value="delete">Delete</button>
 
                 redirects to
                 {% if redirectitem['maintenance'] == False %}
@@ -209,16 +209,15 @@
                 <form action="/save/{{ redirect_records|length }}" method="post">
                 
                 {{ request.host_url }}
-                <input type="text" name="redirectSourceInput" class="addr new" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                <input type="text" name="redirectSourceInput" class="addr new" required style="text-align: left; width:69%">
 
-                <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked">Embedded</label><br><br>
+                <label class="addr select_yes checkbox"><input type="checkbox" name="redirectTargetEmbed" checked="checked">Embedded</label><br><br>
 
-                <button class="addr saved">Save</button>
-                <a href="#" class="addr dis" role="button">Delete</a>
+                <button class="addr save" name="submit" value="save">Add New</button>
 
                 redirects to
-                <input type="text" name="redirectTargetInput" class="addr new" required style="text-align: left; width:61%" onclick="toClicked(this)">
-                <label class="addr select_no checkbox" onclick="maintClicked(this)"><input type="checkbox" name="redirectTargetMaint">Maintenance</label>
+                <input type="text" name="redirectTargetInput" class="addr new" required style="text-align: left; width:65%">
+                <label class="addr select_no checkbox"><input type="checkbox" name="redirectTargetMaint">Maintenance</label>
 
                 </form>
             </div><br>

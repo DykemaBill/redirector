@@ -85,15 +85,6 @@ def save(redirectindex):
         "maintenance" : maintenanceSave
     }
 
-    # Read new configuration values into array for page - NEED TO APPEND THE FOLLOWING WHEN NEW RECORD
-    if redirectindex+1 < len(dataread_records): # Not adding new record
-        dataread_records[redirectindex].redirectfrom = redirectfromSave
-        dataread_records[redirectindex].redirectto = redirecttoSave
-        dataread_records[redirectindex].embed = embedSave
-        dataread_records[redirectindex].maintenance = maintenanceSave
-    else: # We are addding a new record
-        dataread_records.append(dataupdate_newrecord)
-
     # Read entire configuration file so that it can be updated
     try:
         with open(config_file + '.json', 'r') as json_file:
