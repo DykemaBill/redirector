@@ -1,4 +1,4 @@
-from flask import Flask, render_template, json, jsonify, redirect, request, url_for, request
+from flask import Flask, render_template, json, redirect, url_for, request
 import logging
 
 # Setup logging
