@@ -73,8 +73,6 @@ def save(redirectindex):
         maintenanceSave = True
     except:
         maintenanceSave = False
-    
-    print('New path from is ' + redirectfromSave + ' going to ' + redirecttoSave)
 
     # Write the new record for the config file
     dataupdate_newrecord = {
@@ -101,15 +99,27 @@ def save(redirectindex):
         print ('Problem creating to ' + config_file + '_old.json, check to make sure your filesystem is not write protected.')
         config_error = True
 
-    # Replace updated record or add new record
+    # Replace updated record, add new record or delete record
     dataupdate_jsonedit = []
-    if redirectindex+1 < len(dataread_records): # Not adding new record
+    if redirectindex < len(dataread_records): # Not adding new record
         for dataupdate_existingrecord in dataupdate_json['redirects']:
-            if dataupdate_existingrecord['_index'] == redirectindex:
-                dataupdate_jsonedit.append(dataupdate_newrecord)
-            else:
+            # Add all records until we come to the one that was modified
+            if dataupdate_existingrecord['_index'] < redirectindex:
                 dataupdate_jsonedit.append(dataupdate_existingrecord)
-    else: # We are addding a new record
+            # This is the modified record
+            elif dataupdate_existingrecord['_index'] == redirectindex:
+                # Check to see if we should replace it or delete/ignore it
+                if request.form['submit'] == 'save': # Do not add if not delete
+                    dataupdate_jsonedit.append(dataupdate_newrecord)
+            # This is after the modified record
+            # If we saved the modified record, save the rest like normal
+            elif request.form['submit'] == 'save':
+                dataupdate_jsonedit.append(dataupdate_existingrecord)
+            else: # Since we deleted the record, reduce the index
+                curren_index = dataupdate_existingrecord['_index']
+                dataupdate_existingrecord.update({"_index": curren_index-1})
+                dataupdate_jsonedit.append(dataupdate_existingrecord)
+    else: # We are just adding a new record
         dataupdate_jsonedit = dataupdate_json['redirects']
         dataupdate_jsonedit.append(dataupdate_newrecord)
 

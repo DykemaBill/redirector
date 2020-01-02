@@ -22,20 +22,6 @@
             "maintenance": false,
             "redirectfrom": "linkpath/part/microsoft",
             "redirectto": "http://microsoft.com"
-        },
-        {
-            "_index": 3,
-            "embed": true,
-            "maintenance": true,
-            "redirectfrom": "linkpath/part/amazon",
-            "redirectto": "http://aws.amazon.com/"
-        },
-        {
-            "_index": 4,
-            "embed": true,
-            "maintenance": false,
-            "redirectfrom": "linkpath/part/facebook",
-            "redirectto": "http://facebook.com"
         }
     ],
     "team": "Platform Team"
