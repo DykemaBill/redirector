@@ -1,5 +1,5 @@
 from flask import Flask, render_template, json, redirect, url_for, request
-import logging
+import logging, time
 
 # Setup logging
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename='redirector.log')
@@ -92,8 +92,9 @@ def save(redirectindex):
         config_error = True
 
     # Create backup of configuration file
+    datetime = time.strftime("%Y-%m-%d_%H%M%S")
     try:
-        with open(config_file + '_old.json', 'w') as json_file:
+        with open(config_file + '_' + datetime + '.json', 'w') as json_file:
             json.dump(dataupdate_json, json_file, indent=4)
     except IOError:
         print ('Problem creating to ' + config_file + '_old.json, check to make sure your filesystem is not write protected.')
