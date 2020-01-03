@@ -6,6 +6,7 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, file
 
 # Configuration file name
 config_file = 'config'
+logging.info('Reading config file ' + config_file + '.json')
 
 # Class to read JSON configuration file
 class JSONRead:
@@ -28,12 +29,18 @@ def config_file_read():
             global redirector_team
             global redirector_email
             redirector_logo = json_data['logo']
+            logging.info('Logo is set to: ' + redirector_logo)
             redirector_team = json_data['team']
+            logging.info('Team is set to: ' + redirector_team)
             redirector_email = json_data['email']
+            logging.info('Email is set to: ' + redirector_email)
+            logging.info('Redirects loaded as follows:')
             for dataread_record in json_data['redirects']:
+                logging.info(dataread_record)
                 dataread_records.append(JSONRead(**dataread_record))
     except IOError:
-        print ('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
+        print('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
+        logging.info('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
         global config_error
         config_error = True
 
@@ -45,12 +52,15 @@ app = Flask(__name__)
 # Root page about
 @app.route('/')
 def about():
+    logging.info(request.remote_addr + ' ==> Root about page ')
     return render_template('about.html', logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Configuration page
 @app.route('/config')
 def config():
+    logging.info(request.remote_addr + ' ==> Config page ')
     if config_error == True:
+        logging.info(request.remote_addr + ' ==> Config file read error ')
         return render_template('config_error.html', cfgfile=config_file + '.json', logo=redirector_logo, team=redirector_team, email=redirector_email)
     return render_template('config.html', redirect_records=dataread_records, logo=redirector_logo, team=redirector_team, email=redirector_email)
 
@@ -88,7 +98,8 @@ def save(redirectindex):
         with open(config_file + '.json', 'r') as json_file:
             dataupdate_json = json.load(json_file)
     except IOError:
-        print ('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
+        print('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
+        logging.info('Problem opening ' + config_file + '.json, check to make sure your configuration file is not missing.')
         config_error = True
 
     # Create backup of configuration file
@@ -97,7 +108,8 @@ def save(redirectindex):
         with open(config_file + '_' + datetime + '.json', 'w') as json_file:
             json.dump(dataupdate_json, json_file, indent=4)
     except IOError:
-        print ('Problem creating to ' + config_file + '_old.json, check to make sure your filesystem is not write protected.')
+        print('Problem creating to ' + config_file + '_' + datetime + '.json, check to make sure your filesystem is not write protected.')
+        logging.info('Problem creating to ' + config_file + '_' + datetime + '.json, check to make sure your filesystem is not write protected.')
         config_error = True
 
     # Replace updated record, add new record or delete record
@@ -110,8 +122,11 @@ def save(redirectindex):
             # This is the modified record
             elif dataupdate_existingrecord['_index'] == redirectindex:
                 # Check to see if we should replace it or delete/ignore it
-                if request.form['submit'] == 'save': # Do not add if not delete
+                if request.form['submit'] == 'save':
                     dataupdate_jsonedit.append(dataupdate_newrecord)
+                    logging.info('Updated redirect: ' + str(dataupdate_newrecord))
+                else:
+                    logging.info('Deleted redirect: ' + str(dataupdate_newrecord))
             # This is after the modified record
             # If we saved the modified record, save the rest like normal
             elif request.form['submit'] == 'save':
@@ -122,6 +137,7 @@ def save(redirectindex):
                 dataupdate_jsonedit.append(dataupdate_existingrecord)
     else: # We are just adding a new record
         dataupdate_jsonedit = dataupdate_json['redirects']
+        logging.info('Added redirect: ' + str(dataupdate_newrecord))
         dataupdate_jsonedit.append(dataupdate_newrecord)
 
     # Assemble updated configuration file
@@ -132,7 +148,8 @@ def save(redirectindex):
         with open(config_file + '.json', 'w') as json_file:
             json.dump(configupdate_jsonedit, json_file, indent=4)
     except IOError:
-        print ('Problem writing to ' + config_file + '.json, check to make sure your configuration file is not write protected.')
+        print('Problem writing to ' + config_file + '.json, check to make sure your configuration file is not write protected.')
+        logging.info('Problem writing to ' + config_file + '.json, check to make sure your configuration file is not write protected.')
         config_error = True
 
     # Reload configuration page
@@ -142,6 +159,7 @@ def save(redirectindex):
 # Maintenance template page
 @app.route('/maint')
 def maint():
+    logging.info(request.remote_addr + ' ==> Maintenance page ')
     return render_template('maintenance.html', logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Captures routes as defined in configuration file or if not deliver error page
@@ -151,15 +169,16 @@ def redirectfrom(otherpath):
         # Check to see if otherpath equals one of the redirect_route.redirectfrom configured paths
         if otherpath == redirect_route.redirectfrom:
             if redirect_route.maintenance:
-                logging.info(request.remote_addr + ' ==> maintenance: ' + redirect_route.redirectto)
+                logging.info(request.remote_addr + ' ==> Maintenance: ' + redirect_route.redirectto)
                 return redirect(url_for('maint'))
             else:
                 if redirect_route.embed:
-                    logging.info(request.remote_addr + ' ==> embedded: ' + redirect_route.redirectto)
+                    logging.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
                     return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
                 else:
-                    logging.info(request.remote_addr + ' ==> direct: ' + redirect_route.redirectto)
+                    logging.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
                     return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
+    logging.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
     return render_template('error.html', bad_path=otherpath, logo=redirector_logo, team=redirector_team, email=redirector_email)
 
 # Run in debug mode if started from CLI

@@ -13,15 +13,15 @@
             "_index": 1,
             "embed": true,
             "maintenance": false,
-            "redirectfrom": "linkpath/part/google",
-            "redirectto": "http://google.com"
+            "redirectfrom": "linkpath/part/microsoft",
+            "redirectto": "http://microsoft.com"
         },
         {
             "_index": 2,
             "embed": true,
             "maintenance": false,
-            "redirectfrom": "linkpath/part/microsoft",
-            "redirectto": "http://microsoft.com"
+            "redirectfrom": "linkpath/part/google",
+            "redirectto": "http://google.com"
         }
     ],
     "team": "Platform Team"
