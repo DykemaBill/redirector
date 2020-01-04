@@ -8,7 +8,9 @@ Lots still to-do:
 - Configure favicon
 - Add user authentication to configuration page
 - Add redirect links list to landing page
-- Split configuration and startup items from redirect items into seperate logs
+- Split configuration and startup items from redirect items into separate logs
 - Add reorder arrows to config page
 - Add grouping option to config page
+- Add navigation bar
+- CSS clean-up for better responsiveness
 - Test different configuration file write/read error scenarios
