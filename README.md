@@ -6,7 +6,9 @@ Lots still to-do:
 
 - Rename about page to landing page
 - Configure favicon
-- Add multiple port hosting where different ports can direct to different targets
+- Add prefix path checking that can direct to different targets for each configured redirect:
+    Normal redirect: http://flaskserver:port/path/path -> http://someotherpath
+    Prefix option: http://flaskserver:port/prefix/path/path -> http://somedifferentpathorport
 - Add user authentication to configuration page
 - Add redirect links list to landing page
 - Split configuration and startup items from redirect items into separate logs
