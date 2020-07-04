@@ -12,6 +12,7 @@ redirector_logo = "needtosetinconfig"
 redirector_logosize = [ 100, 100 ] # This is width and height
 redirector_logfilesize = [ 10000, 9 ] # 10000 is 10k, 9 is 10 total copies
 redirector_redirects = []
+redirector_users = []
 
 # Class to read JSON configuration file
 class JSONRead:
@@ -36,6 +37,7 @@ def config_file_read():
             global redirector_team
             global redirector_email
             global redirector_redirects
+            global redirector_users
             redirector_logfilesize.clear()
             redirector_logfilesize.append(cfg_data['logfilesize'][0])
             redirector_logfilesize.append(cfg_data['logfilesize'][1])
@@ -49,6 +51,9 @@ def config_file_read():
             for dataread_record in cfg_data['redirects']:
                 dataread_records.append(JSONRead(**dataread_record))
                 redirector_redirects.append(dataread_record)
+            redirector_users.clear()
+            for dataread_user in cfg_data['users']:
+                redirector_users.append(dataread_user)
     except IOError:
         print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
         global config_error
@@ -78,7 +83,7 @@ logger.info('****====****====****====****====****==== Starting up ====****====**
 if config_error == True:
     print ("Unable to read config")
     logger.info('Problem opening ' + config_file + '.cfg, check to make sure your configuration file is not missing.')
-else:
+else: # Config settings out to the log
     print ("Configuration file read")
     logger.info('Log file size is set to ' + str(redirector_logfilesize[0]) + ' bytes and ' + str(redirector_logfilesize[1]) + ' copies')
     logger.info('Email is set to: ' + redirector_email)
@@ -87,6 +92,8 @@ else:
     logger.info('Logo size is set to: ' + str(redirector_logosize[0]) + ', ' + str(redirector_logosize[1]))
     logger.info('Redirects loaded as follows:')
     logger.info(redirector_redirects)
+    logger.info('Users are as follows:')
+    logger.info(redirector_users)
 
 # Create Flask app to build site
 app = Flask(__name__)
@@ -192,7 +199,7 @@ def save(redirectindex):
         dataupdate_jsonedit.append(dataupdate_newrecord)
 
     # Assemble updated configuration file
-    configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': dataupdate_jsonedit}
+    configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': dataupdate_jsonedit, 'users': redirector_users}
 
     # Write updated configuration file
     try:
