@@ -106,6 +106,15 @@ def config():
         return render_template('config_error.html', cfgfile=config_file, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
     return render_template('config.html', redirect_records=dataread_records, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
 
+# Login page
+@app.route('/login')
+def loginpage():
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Login page ')
+        return render_template('login.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+    else:
+        return redirect(url_for('errorpage'))
+
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):

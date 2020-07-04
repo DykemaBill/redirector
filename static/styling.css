@@ -8,11 +8,15 @@
   padding:1em;
   max-width: 1000px;
 }
+
+/* Data entry form */
 .formarea{
   background:rgb(215, 215, 215);
   padding:1em;
   max-width: 1000px;
 }
+
+/* Config page */
 .addr{
   border: none;
   color: white;
@@ -58,4 +62,60 @@
   color: rgb(190, 190, 190);
   background-color: rgb(183, 147, 90);
   border-radius: 12px;
+}
+
+/* Login grid */
+.loginrow{
+  display: grid;
+  grid-template-columns: 300px 360px;
+}
+.logindrow > div {
+  text-align: left;
+}
+
+/* Password validation message */
+#passmessage {
+  display:none;
+  background: rgb(180, 180, 180);
+  color: #000;
+  position: relative;
+  padding: 1em 3em;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+#passmessage p {
+  font-size: 18px;
+}
+
+/* Checkmarks as fields are correctly filled out */
+input + span {
+  padding-right: 30px;
+}
+input:invalid+span:after {
+  position: absolute; content: '✖';
+  padding-left: 5px;
+}
+input:valid+span:after {
+  position: absolute;
+  content: '✓';
+  padding-left: 5px;
+}
+
+/* Green checkmark */
+.valid {
+  color: #357f37;
+}
+.valid:before {
+  position: relative;
+  left: -35px;
+  content: '✓';
+}
+/* Red "x" icon */
+.invalid {
+  color: #922424;
+}
+.invalid:before {
+  position: relative;
+  left: -35px;
+  content: '✖';
 }
