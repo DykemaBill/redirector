@@ -13,9 +13,10 @@ redirector_logosize = [ 100, 100 ] # This is width and height
 redirector_logfilesize = [ 10000, 9 ] # 10000 is 10k, 9 is 10 total copies
 redirector_redirects = []
 redirector_users = []
+user_session = "Not logged in"
 
 # Class to read JSON configuration file
-class JSONRead:
+class RedirectJSONtoArray:
     def __init__(self, _index, redirectfrom, redirectto, embed, maintenance):
         self._index = _index
         self.redirectfrom = redirectfrom
@@ -49,7 +50,7 @@ def config_file_read():
             redirector_email = cfg_data['email']
             redirector_redirects.clear()
             for dataread_record in cfg_data['redirects']:
-                dataread_records.append(JSONRead(**dataread_record))
+                dataread_records.append(RedirectJSONtoArray(**dataread_record))
                 redirector_redirects.append(dataread_record)
             redirector_users.clear()
             for dataread_user in cfg_data['users']:
@@ -114,11 +115,24 @@ def config():
     return render_template('config.html', redirect_records=dataread_records, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
 
 # Login page
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def loginpage():
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Login page ')
-        return render_template('login.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+        if request.method == 'POST':
+            # Process login after form is filled out and a POST request happens
+            user_request_name = request.form['user_login']
+            user_request_pass = request.form['user_pass']
+            print ("Got a request from user " + user_request_name)
+            # Look to see if this is a valid user
+            # NOT FINDING THE .NAME in USER_RECORD???
+            user_check = [user_record for user_record in redirector_users if user_record.name == user_request_name][0]
+            print ("User check result is: " + user_check)
+            #user_session
+            return redirect(url_for('config'))
+        else:
+            # Show login page on initial GET request
+            return render_template('login.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
     else:
         return redirect(url_for('errorpage'))
 
