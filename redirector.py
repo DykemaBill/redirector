@@ -1,4 +1,4 @@
-from flask import Flask, render_template, json, redirect, url_for, request
+from flask import Flask, g, render_template, json, redirect, url_for, request, session
 import logging, logging.handlers, time, platform, sys
 
 # Configuration file name
@@ -98,12 +98,45 @@ else: # Config settings out to the log
 
 # Create Flask app to build site
 app = Flask(__name__)
+# Add secret key since session requires it
+app.secret_key = 'redirector session top secret'
+
+# Run first before any routes can be used
+@app.before_request
+def before_request():
+    # Check to see if the end user already has an existing session
+    if 'user_id' in session:
+        user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
+        # Set global variables for user
+        g.user = user_session
+        g.logo=redirector_logo
+        g.logosize=redirector_logosize
+        g.team=redirector_team
+        g.email=redirector_email
+    else:
+        # NEED TO MAKE THIS GUEST USER LOOK LIKE A REAL USER
+        # Since user does not have a session, give them a guest one
+        user_guest = [
+            {
+            "_index": 999999999999,
+            "name": "guest",
+            "password": "nopass"
+            }
+        ]
+        # Create guest session
+        session['user_id'] = user_guest[0]['_index']
+        # Set global variables for guest user
+        g.user = user_guest
+        g.logo=redirector_logo
+        g.logosize=redirector_logosize
+        g.team=redirector_team
+        g.email=redirector_email
 
 # Root page about
 @app.route('/')
 def about():
     logger.info(request.remote_addr + ' ==> Root about page ')
-    return render_template('about.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+    return render_template('about.html')
 
 # Configuration page
 @app.route('/config')
@@ -111,8 +144,8 @@ def config():
     logger.info(request.remote_addr + ' ==> Config page ')
     if config_error == True:
         logger.info(request.remote_addr + ' ==> Config file read error ')
-        return render_template('config_error.html', cfgfile=config_file, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
-    return render_template('config.html', redirect_records=dataread_records, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+        return render_template('config_error.html', cfgfile=config_file)
+    return render_template('config.html', redirect_records=dataread_records)
 
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
@@ -120,30 +153,42 @@ def loginpage():
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Login page ')
         if request.method == 'POST':
+            # Clear any previous login session
+            session.pop('user_id', None)
             # Process login after form is filled out and a POST request happens
             user_request_name = request.form['user_login']
             user_request_pass = request.form['user_pass']
             print ("Got a request from user " + user_request_name)
             # Look to see if this is a valid user
-            # NOT FINDING THE .NAME in USER_RECORD???
             user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
             # for user_record in redirector_users:
             #     print ("Current user record is " + str(user_record['name']))
             print ("User check result is: " + str(user_check))
             if not user_check:
-                return render_template('login.html', logintitle="User does not exist, try again", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+                # Non-existent user name
+                return render_template('login.html', logintitle="User does not exist, try again")
             else:
                 print ("Checking against stored password: " + str(user_check[0]['password']))
                 print ("Password you typed is: " + user_request_pass)
+                # Correct password
                 if user_check[0]['password'] == user_request_pass:
+                    # Set session to logged in user
+                    session['user_id'] = user_check[0]['_index']
+                    # Set global variables for user
+                    g.user = user_check[0]
+                    g.logo=redirector_logo
+                    g.logosize=redirector_logosize
+                    g.team=redirector_team
+                    g.email=redirector_email
+                    # Redirect sucessfully logged in user to configuration page
                     return redirect(url_for('config'))
-                else:
-                    return render_template('login.html', logintitle="Incorrect password", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
-            #user_session
-            # return redirect(url_for('config'))
+                else: # Incorrect password
+                    return render_template('login.html', logintitle="Incorrect password, try again")
+            # Login process failed all together
+            return render_template('login.html', logintitle="Login attempt failed, try again")
         else:
             # Show login page on initial GET request
-            return render_template('login.html', logintitle="Please login", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+            return render_template('login.html', logintitle="Please login")
     else:
         return redirect(url_for('errorpage'))
 
@@ -243,7 +288,7 @@ def save(redirectindex):
 @app.route('/maint')
 def maint():
     logger.info(request.remote_addr + ' ==> Maintenance page ')
-    return render_template('maintenance.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+    return render_template('maintenance.html')
 
 # IE notice page
 @app.route('/ienotice')
@@ -268,7 +313,7 @@ def redirectfrom(otherpath):
                     logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
                     return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
     logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
-    return render_template('error.html', bad_path=otherpath, logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+    return render_template('error.html', bad_path=otherpath)
 
 # Status page
 @app.route('/status')
