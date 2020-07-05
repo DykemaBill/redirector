@@ -4,6 +4,7 @@ function fromClicked() {
 }
 
 // When the user clicks outside of the password field, hide the message box
+// Add onblur="fromExit()" to field to use this
 function fromExit() {
   document.getElementById("passmessage").style.display = "none";
 }

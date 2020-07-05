@@ -126,13 +126,24 @@ def loginpage():
             print ("Got a request from user " + user_request_name)
             # Look to see if this is a valid user
             # NOT FINDING THE .NAME in USER_RECORD???
-            user_check = [user_record for user_record in redirector_users if user_record.name == user_request_name][0]
-            print ("User check result is: " + user_check)
+            user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
+            # for user_record in redirector_users:
+            #     print ("Current user record is " + str(user_record['name']))
+            print ("User check result is: " + str(user_check))
+            if not user_check:
+                return render_template('login.html', logintitle="User does not exist, try again", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+            else:
+                print ("Checking against stored password: " + str(user_check[0]['password']))
+                print ("Password you typed is: " + user_request_pass)
+                if user_check[0]['password'] == user_request_pass:
+                    return redirect(url_for('config'))
+                else:
+                    return render_template('login.html', logintitle="Incorrect password", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
             #user_session
-            return redirect(url_for('config'))
+            # return redirect(url_for('config'))
         else:
             # Show login page on initial GET request
-            return render_template('login.html', logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
+            return render_template('login.html', logintitle="Please login", logo=redirector_logo, logosize=redirector_logosize, team=redirector_team, email=redirector_email)
     else:
         return redirect(url_for('errorpage'))
 
