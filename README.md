@@ -9,9 +9,10 @@ Lots still to-do:
 - Add logo size to config file - DONE
 - Add IE check - DONE
 - Add Status page - DONE
+- Add user authentication to configuration page - DONE, but need to hash password
+- Add option to request a new login
 - Rename about page to landing page
 - Add redirect links list to landing page
-- Add user authentication to configuration page
 - Work on what happens if the configuration file cannot be found
 - Add DB check for each redirect to provide a different response based on a field value
 - Add reorder arrows to config page

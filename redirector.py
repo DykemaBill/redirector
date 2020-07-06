@@ -101,31 +101,28 @@ app = Flask(__name__)
 # Add secret key since session requires it
 app.secret_key = 'redirector session top secret'
 
-# Run first before any routes can be used
+# Run first before all route calls
 @app.before_request
 def before_request():
     # Check to see if the end user already has an existing session
-    if 'user_id' in session:
+    if 'user_id' in session and session['user_id'] != 999999999999: # User session exists and it is not a guest
+        # Find the user ID
         user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
+        print ("User session is set to " + str(user_session))
         # Set global variables for user
         g.user = user_session
         g.logo=redirector_logo
         g.logosize=redirector_logosize
         g.team=redirector_team
         g.email=redirector_email
-    else:
-        # NEED TO MAKE THIS GUEST USER LOOK LIKE A REAL USER
-        # Since user does not have a session, give them a guest one
-        user_guest = [
-            {
-            "_index": 999999999999,
-            "name": "guest",
-            "password": "nopass"
-            }
-        ]
-        # Create guest session
-        session['user_id'] = user_guest[0]['_index']
-        # Set global variables for guest user
+    else: # User is a new or existing guest
+        # Setup guest variables
+        user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+        print ("User guest is set to " + str(user_guest))
+        if 'user_id' not in session:
+            # Create guest login session
+            session['user_id'] = user_guest['_index']
+        # Set global variables for guest
         g.user = user_guest
         g.logo=redirector_logo
         g.logosize=redirector_logosize
@@ -141,10 +138,12 @@ def about():
 # Configuration page
 @app.route('/config')
 def config():
-    logger.info(request.remote_addr + ' ==> Config page ')
+    logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['name']))
     if config_error == True:
         logger.info(request.remote_addr + ' ==> Config file read error ')
         return render_template('config_error.html', cfgfile=config_file)
+    if session['user_id'] == 999999999999: # User is a guest
+        return redirect(url_for('loginpage'))
     return render_template('config.html', redirect_records=dataread_records)
 
 # Login page
@@ -161,8 +160,6 @@ def loginpage():
             print ("Got a request from user " + user_request_name)
             # Look to see if this is a valid user
             user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
-            # for user_record in redirector_users:
-            #     print ("Current user record is " + str(user_record['name']))
             print ("User check result is: " + str(user_check))
             if not user_check:
                 # Non-existent user name
@@ -191,6 +188,26 @@ def loginpage():
             return render_template('login.html', logintitle="Please login")
     else:
         return redirect(url_for('errorpage'))
+
+# Logout page
+@app.route('/logout')
+def logoutpage():
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Logout page ' + str(g.user['name']))
+        # Clear login session
+        session.pop('user_id', None)
+        # Setup guest variables
+        user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+        print ("User guest is set to " + str(user_guest))
+        # Create guest login session
+        session['user_id'] = user_guest['_index']
+        # Set global variables for guest
+        g.user = user_guest
+        g.logo=redirector_logo
+        g.logosize=redirector_logosize
+        g.team=redirector_team
+        g.email=redirector_email
+        return render_template('login.html', logintitle="You have successfully logged out")
 
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
@@ -252,9 +269,9 @@ def save(redirectindex):
                 # Check to see if we should replace it or delete/ignore it
                 if request.form['submit'] == 'save':
                     dataupdate_jsonedit.append(dataupdate_newrecord)
-                    logger.info('Updated redirect: ' + str(dataupdate_newrecord))
+                    logger.info(str(g.user['name']) + ' updated redirect: ' + str(dataupdate_newrecord))
                 else:
-                    logger.info('Deleted redirect: ' + str(dataupdate_newrecord))
+                    logger.info(str(g.user['name']) + ' deleted redirect: ' + str(dataupdate_newrecord))
             # This is after the modified record
             # If we saved the modified record, save the rest like normal
             elif request.form['submit'] == 'save':
@@ -265,7 +282,7 @@ def save(redirectindex):
                 dataupdate_jsonedit.append(dataupdate_existingrecord)
     else: # We are just adding a new record
         dataupdate_jsonedit = dataupdate_json['redirects']
-        logger.info('Added redirect: ' + str(dataupdate_newrecord))
+        logger.info(str(g.user['name']) + ' added redirect: ' + str(dataupdate_newrecord))
         dataupdate_jsonedit.append(dataupdate_newrecord)
 
     # Assemble updated configuration file
