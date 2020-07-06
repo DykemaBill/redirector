@@ -1,5 +1,8 @@
+# Default user password of Ch@ng3MEN0w! encoded as Q2hAbmczTUVOMHch in config file
+
 from flask import Flask, g, render_template, json, redirect, url_for, request, session
 import logging, logging.handlers, time, platform, sys
+from base64 import b64encode, b64decode
 
 # Configuration file name
 config_name = 'redirector'
@@ -108,7 +111,6 @@ def before_request():
     if 'user_id' in session and session['user_id'] != 999999999999: # User session exists and it is not a guest
         # Find the user ID
         user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
-        print ("User session is set to " + str(user_session))
         # Set global variables for user
         g.user = user_session
         g.logo=redirector_logo
@@ -118,7 +120,6 @@ def before_request():
     else: # User is a new or existing guest
         # Setup guest variables
         user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
-        print ("User guest is set to " + str(user_guest))
         if 'user_id' not in session:
             # Create guest login session
             session['user_id'] = user_guest['_index']
@@ -150,25 +151,23 @@ def config():
 @app.route('/login', methods=['GET', 'POST'])
 def loginpage():
     if config_error == False:
-        logger.info(request.remote_addr + ' ==> Login page ')
         if request.method == 'POST':
             # Clear any previous login session
             session.pop('user_id', None)
             # Process login after form is filled out and a POST request happens
             user_request_name = request.form['user_login']
             user_request_pass = request.form['user_pass']
-            print ("Got a request from user " + user_request_name)
             # Look to see if this is a valid user
             user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
-            print ("User check result is: " + str(user_check))
             if not user_check:
                 # Non-existent user name
+                logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' does not exist')
                 return render_template('login.html', logintitle="User does not exist, try again")
             else:
-                print ("Checking against stored password: " + str(user_check[0]['password']))
-                print ("Password you typed is: " + user_request_pass)
+                # Password is stored encoded, decoding it
+                password_decoded = b64decode(user_check[0]['password']).decode("utf-8")
                 # Correct password
-                if user_check[0]['password'] == user_request_pass:
+                if password_decoded == user_request_pass:
                     # Set session to logged in user
                     session['user_id'] = user_check[0]['_index']
                     # Set global variables for user
@@ -178,13 +177,17 @@ def loginpage():
                     g.team=redirector_team
                     g.email=redirector_email
                     # Redirect sucessfully logged in user to configuration page
+                    logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful')
                     return redirect(url_for('config'))
                 else: # Incorrect password
+                    logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' bad password')
                     return render_template('login.html', logintitle="Incorrect password, try again")
             # Login process failed all together
+            logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' unknown reason')
             return render_template('login.html', logintitle="Login attempt failed, try again")
         else:
             # Show login page on initial GET request
+            logger.info(request.remote_addr + ' ==> Login page ' + str(g.user['name']))
             return render_template('login.html', logintitle="Please login")
     else:
         return redirect(url_for('errorpage'))
@@ -198,7 +201,6 @@ def logoutpage():
         session.pop('user_id', None)
         # Setup guest variables
         user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
-        print ("User guest is set to " + str(user_guest))
         # Create guest login session
         session['user_id'] = user_guest['_index']
         # Set global variables for guest

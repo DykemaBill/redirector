@@ -9,8 +9,12 @@ Lots still to-do:
 - Add logo size to config file - DONE
 - Add IE check - DONE
 - Add Status page - DONE
-- Add user authentication to configuration page - DONE, but need to hash password
-- Add option to request a new login
+- Add user authentication to configuration page - DONE
+- Have user authentication check to see if accounts are approved
+- Fix problem where password special characters stored in config crashes decode process
+- Hide passwords in log
+- Add page to request a new login where it creates the account unapproved
+- Add page to approve or unapprove logins
 - Rename about page to landing page
 - Add redirect links list to landing page
 - Work on what happens if the configuration file cannot be found
