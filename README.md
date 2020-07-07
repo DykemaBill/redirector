@@ -11,8 +11,7 @@ Lots still to-do:
 - Add Status page - DONE
 - Add user authentication to configuration page - DONE
 - Have user authentication check to see if accounts are approved - DONE
-- Fix problem where password special characters stored in config crashes decode process
-- Hide passwords in log
+- Hide passwords in log - DONE
 - Add page to request a new login where it creates the account unapproved
 - Add page to approve or unapprove logins
 - Rename about page to landing page
@@ -23,6 +22,7 @@ Lots still to-do:
 - Add grouping option to config page
 - Add navigation bar
 - CSS clean-up for better responsiveness, remove deprecated HTML and move to CSS
+- Fix problem where password special characters stored in config crashes decode process
 - Split configuration and startup items from redirect items into separate logs
 - Add prefix path checking that can direct to different targets for each configured redirect:
     Normal redirect: http://flaskserver:port/path/path -> http://someotherpath

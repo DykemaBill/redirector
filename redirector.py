@@ -97,7 +97,16 @@ else: # Config settings out to the log
     logger.info('Redirects loaded as follows:')
     logger.info(redirector_redirects)
     logger.info('Users are as follows:')
-    logger.info(redirector_users)
+    # Write user info to log without encoded passwords
+    redirect_users_log = []
+    for user_record in redirector_users:
+        redirect_users_record = {}
+        redirect_users_record['_index'] = user_record['_index']
+        redirect_users_record['approved'] = user_record['approved']
+        redirect_users_record['name'] = user_record['name']
+        redirect_users_record['password'] = "*******"
+        redirect_users_log.append(redirect_users_record)
+    logger.info(redirect_users_log)
 
 # Create Flask app to build site
 app = Flask(__name__)
