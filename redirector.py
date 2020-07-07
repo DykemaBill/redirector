@@ -168,17 +168,24 @@ def loginpage():
                 password_decoded = b64decode(user_check[0]['password']).decode("utf-8")
                 # Correct password
                 if password_decoded == user_request_pass:
-                    # Set session to logged in user
-                    session['user_id'] = user_check[0]['_index']
-                    # Set global variables for user
-                    g.user = user_check[0]
-                    g.logo=redirector_logo
-                    g.logosize=redirector_logosize
-                    g.team=redirector_team
-                    g.email=redirector_email
-                    # Redirect sucessfully logged in user to configuration page
-                    logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful')
-                    return redirect(url_for('config'))
+                    # Check to make sure user is approved
+                    user_approved = [user_record for user_record in redirector_users if user_record['name'] == user_request_name and user_record['approved'] == True]
+                    if not user_approved:
+                        # Login successful, but user not approved
+                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful, but not approved')
+                        return render_template('login.html', logintitle="Login successful, but not approved, check with your administrator")
+                    else:
+                        # Set session to logged in user
+                        session['user_id'] = user_check[0]['_index']
+                        # Set global variables for user
+                        g.user = user_check[0]
+                        g.logo=redirector_logo
+                        g.logosize=redirector_logosize
+                        g.team=redirector_team
+                        g.email=redirector_email
+                        # Redirect sucessfully logged in user to configuration page
+                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful')
+                        return redirect(url_for('config'))
                 else: # Incorrect password
                     logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' bad password')
                     return render_template('login.html', logintitle="Incorrect password, try again")

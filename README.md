@@ -10,7 +10,7 @@ Lots still to-do:
 - Add IE check - DONE
 - Add Status page - DONE
 - Add user authentication to configuration page - DONE
-- Have user authentication check to see if accounts are approved
+- Have user authentication check to see if accounts are approved - DONE
 - Fix problem where password special characters stored in config crashes decode process
 - Hide passwords in log
 - Add page to request a new login where it creates the account unapproved

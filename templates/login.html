@@ -41,14 +41,14 @@
     
                                 <p>Account name<br><input type="login" class="addr new" name="user_login" minlength="7" maxlength="17" required autofocus><span></span></p>
     
-                                <p>Password<br><input type="password" id="passfield" class="addr new" name="user_pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{10,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 10 or more characters" required onclick="fromClicked()" onkeyup="fromType(this)"><span></span></p>
+                                <p>Password<br><input type="password" id="passfield" class="addr new" name="user_pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{9,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 9 or more characters" required onclick="fromClicked()" onkeyup="fromType(this)"><span></span></p>
                         </div>
                         <div>
                                 <div id="passmessage">
                                     <p id="passletter" class="invalid">A <b>lowercase</b> letter</p>
                                     <p id="passcapital" class="invalid">A <b>capital (uppercase)</b> letter</p>
                                     <p id="passnumber" class="invalid">A <b>number</b></p>
-                                    <p id="passlength" class="invalid">Minimum <b>10 characters</b></p>
+                                    <p id="passlength" class="invalid">Minimum <b>9 characters</b></p>
                                 </div>
                         </div>
                     </div>

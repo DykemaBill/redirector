@@ -49,7 +49,7 @@ function fromType(element) {
   }
 
   // Validate length
-  if(element.value.length >= 10) {
+  if(element.value.length >= 9) {
       passLength.classList.remove("invalid");
       passLength.classList.add("valid");
   } else {
