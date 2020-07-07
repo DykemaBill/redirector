@@ -227,6 +227,36 @@ def logoutpage():
         g.email=redirector_email
         return render_template('login.html', logintitle="You have successfully logged out")
 
+# Login create page
+@app.route('/loginnew', methods=['GET', 'POST'])
+def loginnewpage():
+    if config_error == False:
+        if request.method == 'POST':
+            # Create new login HERE!
+            # Process new login after form is filled out and a POST request happens
+            user_request_name = request.form['user_login']
+            user_request_pass = request.form['user_pass']
+            logger.info(request.remote_addr + ' ==> Login create request ' + user_request_name)
+            return render_template('loginnew.html', logintitle="A new login would have been created here")
+        else:
+            # Show login create page on initial GET request
+            logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['name']))
+            # Clear login session
+            session.pop('user_id', None)
+            # Setup guest variables
+            user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+            # Create guest login session
+            session['user_id'] = user_guest['_index']
+            # Set global variables for guest
+            g.user = user_guest
+            g.logo=redirector_logo
+            g.logosize=redirector_logosize
+            g.team=redirector_team
+            g.email=redirector_email
+            return render_template('loginnew.html', logintitle="Create a new login")
+    else:
+        return redirect(url_for('errorpage'))
+
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):
