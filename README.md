@@ -12,7 +12,8 @@ Lots still to-do:
 - Add user authentication to configuration page - DONE
 - Have user authentication check to see if accounts are approved - DONE
 - Hide passwords in log - DONE
-- Add page to request a new login where it creates the account unapproved
+- Add page to request a new login where it creates the account unapproved - DONE
+- Add check when adding new user to make sure it does not already exist
 - Add page to approve or unapprove logins
 - Rename about page to landing page
 - Add redirect links list to landing page

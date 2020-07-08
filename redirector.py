@@ -116,49 +116,62 @@ app.secret_key = 'redirector session top secret'
 # Run first before all route calls
 @app.before_request
 def before_request():
-    # Check to see if the end user already has an existing session
-    if 'user_id' in session and session['user_id'] != 999999999999: # User session exists and it is not a guest
-        # Find the user ID
-        user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
-        # Set global variables for user
-        g.user = user_session
-        g.logo=redirector_logo
-        g.logosize=redirector_logosize
-        g.team=redirector_team
-        g.email=redirector_email
-    else: # User is a new or existing guest
-        # Setup guest variables
-        user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
-        if 'user_id' not in session:
-            # Create guest login session
-            session['user_id'] = user_guest['_index']
-        # Set global variables for guest
-        g.user = user_guest
-        g.logo=redirector_logo
-        g.logosize=redirector_logosize
-        g.team=redirector_team
-        g.email=redirector_email
+    global config_error
+    if config_error == False:
+        # Check to see if the end user already has an existing session
+        if 'user_id' in session and session['user_id'] != 999999999999: # User session exists and it is not a guest
+            # Find the user ID
+            user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
+            # Set global variables for user
+            g.user = user_session
+            g.logo=redirector_logo
+            g.logosize=redirector_logosize
+            g.team=redirector_team
+            g.email=redirector_email
+        else: # User is a new or existing guest
+            # Setup guest variables
+            user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+            if 'user_id' not in session:
+                # Create guest login session
+                session['user_id'] = user_guest['_index']
+            # Set global variables for guest
+            g.user = user_guest
+            g.logo=redirector_logo
+            g.logosize=redirector_logosize
+            g.team=redirector_team
+            g.email=redirector_email
+    else:
+        return redirect(url_for('errorpage'))
 
 # Root page about
 @app.route('/')
 def about():
-    logger.info(request.remote_addr + ' ==> Root about page ')
-    return render_template('about.html')
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Root about page ')
+        return render_template('about.html')
+    else:
+        return redirect(url_for('errorpage'))
 
 # Configuration page
 @app.route('/config')
 def config():
-    logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['name']))
-    if config_error == True:
-        logger.info(request.remote_addr + ' ==> Config file read error ')
-        return render_template('config_error.html', cfgfile=config_file)
-    if session['user_id'] == 999999999999: # User is a guest
-        return redirect(url_for('loginpage'))
-    return render_template('config.html', redirect_records=dataread_records)
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['name']))
+        if config_error == True:
+            logger.info(request.remote_addr + ' ==> Config file read error ')
+            return render_template('config_error.html', cfgfile=config_file)
+        if session['user_id'] == 999999999999: # User is a guest
+            return redirect(url_for('loginpage'))
+        return render_template('config.html', redirect_records=dataread_records)
+    else:
+        return redirect(url_for('errorpage'))
 
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
 def loginpage():
+    global config_error
     if config_error == False:
         if request.method == 'POST':
             # Clear any previous login session
@@ -211,6 +224,7 @@ def loginpage():
 # Logout page
 @app.route('/logout')
 def logoutpage():
+    global config_error
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Logout page ' + str(g.user['name']))
         # Clear login session
@@ -230,14 +244,77 @@ def logoutpage():
 # Login create page
 @app.route('/loginnew', methods=['GET', 'POST'])
 def loginnewpage():
+    global config_error
     if config_error == False:
         if request.method == 'POST':
-            # Create new login HERE!
             # Process new login after form is filled out and a POST request happens
             user_request_name = request.form['user_login']
             user_request_pass = request.form['user_pass']
             logger.info(request.remote_addr + ' ==> Login create request ' + user_request_name)
-            return render_template('loginnew.html', logintitle="A new login would have been created here")
+            
+            # Find index to use for new user
+            user_last = redirector_users[-1]
+            user_last_index = user_last['_index']
+            user_index = user_last_index + 1
+
+            # Encode password
+            user_passencoded_byte = b64encode(user_request_pass.encode("utf-8"))
+            user_passencoded = user_passencoded_byte.decode("utf-8")
+
+            # Write the new user for the config file
+            dataupdate_newuser = {
+                "_index": user_index,
+                "approved": False,
+                "name": user_request_name,
+                "password": user_passencoded
+            }
+
+            # Read entire configuration file so that it can be updated
+            try:
+                with open(config_file, 'r') as json_file:
+                    dataupdate_json = json.load(json_file)
+            except IOError:
+                print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                config_error = True
+
+            # Create backup of configuration file
+            datetime = time.strftime("%Y-%m-%d_%H%M%S")
+            try:
+                with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
+                    json.dump(dataupdate_json, json_file, indent=4)
+            except IOError:
+                print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                config_error = True
+
+            # Add new user
+            redirector_users.append(dataupdate_newuser)
+
+            # Assemble updated configuration file
+            configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': redirector_redirects, 'users': redirector_users}
+
+            # Write updated configuration file
+            try:
+                with open(config_file, 'w') as json_file:
+                    json.dump(configupdate_jsonedit, json_file, indent=4)
+            except IOError:
+                print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                config_error = True
+
+            # Write user info to log without encoded password
+            dataupdate_newuser_log = {
+                "_index": user_index,
+                "approved": False,
+                "name": user_request_name,
+                "password": "*******"
+            }
+            logger.info('Added user: ' + str(dataupdate_newuser_log))
+
+            # Let new user know they are added but not approved
+            return render_template('login.html', logintitle="New user " + user_request_name + " added, but not approved!")
+
         else:
             # Show login create page on initial GET request
             logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['name']))
@@ -260,147 +337,168 @@ def loginnewpage():
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):
-    # Read new redirect from address
-    redirectfromSave = request.form['redirectSourceInput']
-    # Read new redirect to address
-    redirecttoSave = request.form['redirectTargetInput']
-    # Embed need try for checkbox to catch exception when it has no value
-    try:
-        request.form['redirectTargetEmbed']
-        embedSave = True
-    except:
-        embedSave = False
-    # Maintenance need try for checkbox to catch exception when it has no value
-    try:
-        request.form['redirectTargetMaint']
-        maintenanceSave = True
-    except:
-        maintenanceSave = False
+    global config_error
+    if config_error == False:
+        # Read new redirect from address
+        redirectfromSave = request.form['redirectSourceInput']
+        # Read new redirect to address
+        redirecttoSave = request.form['redirectTargetInput']
+        # Embed need try for checkbox to catch exception when it has no value
+        try:
+            request.form['redirectTargetEmbed']
+            embedSave = True
+        except:
+            embedSave = False
+        # Maintenance need try for checkbox to catch exception when it has no value
+        try:
+            request.form['redirectTargetMaint']
+            maintenanceSave = True
+        except:
+            maintenanceSave = False
 
-    # Write the new record for the config file
-    dataupdate_newrecord = {
-        "_index": redirectindex,
-        "redirectfrom" : redirectfromSave,
-        "redirectto" : redirecttoSave,
-        "embed" : embedSave,
-        "maintenance" : maintenanceSave
-    }
+        # Write the new record for the config file
+        dataupdate_newrecord = {
+            "_index": redirectindex,
+            "redirectfrom" : redirectfromSave,
+            "redirectto" : redirecttoSave,
+            "embed" : embedSave,
+            "maintenance" : maintenanceSave
+        }
 
-    # Read entire configuration file so that it can be updated
-    try:
-        with open(config_file, 'r') as json_file:
-            dataupdate_json = json.load(json_file)
-    except IOError:
-        print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
-        logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
-        config_error = True
+        # Read entire configuration file so that it can be updated
+        try:
+            with open(config_file, 'r') as json_file:
+                dataupdate_json = json.load(json_file)
+        except IOError:
+            print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+            logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+            config_error = True
 
-    # Create backup of configuration file
-    datetime = time.strftime("%Y-%m-%d_%H%M%S")
-    try:
-        with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
-            json.dump(dataupdate_json, json_file, indent=4)
-    except IOError:
-        print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
-        logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
-        config_error = True
+        # Create backup of configuration file
+        datetime = time.strftime("%Y-%m-%d_%H%M%S")
+        try:
+            with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
+                json.dump(dataupdate_json, json_file, indent=4)
+        except IOError:
+            print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+            logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+            config_error = True
 
-    # Replace updated record, add new record or delete record
-    dataupdate_jsonedit = []
-    if redirectindex < len(dataread_records): # Not adding new record
-        for dataupdate_existingrecord in dataupdate_json['redirects']:
-            # Add all records until we come to the one that was modified
-            if dataupdate_existingrecord['_index'] < redirectindex:
-                dataupdate_jsonedit.append(dataupdate_existingrecord)
-            # This is the modified record
-            elif dataupdate_existingrecord['_index'] == redirectindex:
-                # Check to see if we should replace it or delete/ignore it
-                if request.form['submit'] == 'save':
-                    dataupdate_jsonedit.append(dataupdate_newrecord)
-                    logger.info(str(g.user['name']) + ' updated redirect: ' + str(dataupdate_newrecord))
-                else:
-                    logger.info(str(g.user['name']) + ' deleted redirect: ' + str(dataupdate_newrecord))
-            # This is after the modified record
-            # If we saved the modified record, save the rest like normal
-            elif request.form['submit'] == 'save':
-                dataupdate_jsonedit.append(dataupdate_existingrecord)
-            else: # Since we deleted the record, reduce the index
-                curren_index = dataupdate_existingrecord['_index']
-                dataupdate_existingrecord.update({"_index": curren_index-1})
-                dataupdate_jsonedit.append(dataupdate_existingrecord)
-    else: # We are just adding a new record
-        dataupdate_jsonedit = dataupdate_json['redirects']
-        logger.info(str(g.user['name']) + ' added redirect: ' + str(dataupdate_newrecord))
-        dataupdate_jsonedit.append(dataupdate_newrecord)
+        # Replace updated record, add new record or delete record
+        dataupdate_jsonedit = []
+        if redirectindex < len(dataread_records): # Not adding new record
+            for dataupdate_existingrecord in dataupdate_json['redirects']:
+                # Add all records until we come to the one that was modified
+                if dataupdate_existingrecord['_index'] < redirectindex:
+                    dataupdate_jsonedit.append(dataupdate_existingrecord)
+                # This is the modified record
+                elif dataupdate_existingrecord['_index'] == redirectindex:
+                    # Check to see if we should replace it or delete/ignore it
+                    if request.form['submit'] == 'save':
+                        dataupdate_jsonedit.append(dataupdate_newrecord)
+                        logger.info(str(g.user['name']) + ' updated redirect: ' + str(dataupdate_newrecord))
+                    else:
+                        logger.info(str(g.user['name']) + ' deleted redirect: ' + str(dataupdate_newrecord))
+                # This is after the modified record
+                # If we saved the modified record, save the rest like normal
+                elif request.form['submit'] == 'save':
+                    dataupdate_jsonedit.append(dataupdate_existingrecord)
+                else: # Since we deleted the record, reduce the index
+                    curren_index = dataupdate_existingrecord['_index']
+                    dataupdate_existingrecord.update({"_index": curren_index-1})
+                    dataupdate_jsonedit.append(dataupdate_existingrecord)
+        else: # We are just adding a new record
+            dataupdate_jsonedit = dataupdate_json['redirects']
+            logger.info(str(g.user['name']) + ' added redirect: ' + str(dataupdate_newrecord))
+            dataupdate_jsonedit.append(dataupdate_newrecord)
 
-    # Assemble updated configuration file
-    configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': dataupdate_jsonedit, 'users': redirector_users}
+        # Assemble updated configuration file
+        configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': dataupdate_jsonedit, 'users': redirector_users}
 
-    # Write updated configuration file
-    try:
-        with open(config_file, 'w') as json_file:
-            json.dump(configupdate_jsonedit, json_file, indent=4)
-    except IOError:
-        print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
-        logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
-        config_error = True
+        # Write updated configuration file
+        try:
+            with open(config_file, 'w') as json_file:
+                json.dump(configupdate_jsonedit, json_file, indent=4)
+        except IOError:
+            print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+            logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+            config_error = True
 
-    # Reload configuration page
-    config_file_read()
-    return redirect(url_for('config'))
+        # Reload configuration page
+        config_file_read()
+        return redirect(url_for('config'))
+    
+    else:
+        return redirect(url_for('errorpage'))
 
 # Maintenance template page
 @app.route('/maint')
 def maint():
-    logger.info(request.remote_addr + ' ==> Maintenance page ')
-    return render_template('maintenance.html')
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Maintenance page ')
+        return render_template('maintenance.html')
+    else:
+        return redirect(url_for('errorpage'))
 
 # IE notice page
 @app.route('/ienotice')
 def ienotice():
-    logger.info(request.remote_addr + ' ==> IE notice page ')
-    return render_template('ienotice.html')
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> IE notice page ')
+        return render_template('ienotice.html')
+    else:
+        return redirect(url_for('errorpage'))
 
 # Captures routes as defined in configuration file or if not deliver error page
 @app.route('/<path:otherpath>')
 def redirectfrom(otherpath):
-    for redirect_route in dataread_records:
-        # Check to see if otherpath equals one of the redirect_route.redirectfrom configured paths
-        if otherpath == redirect_route.redirectfrom:
-            if redirect_route.maintenance:
-                logger.info(request.remote_addr + ' ==> Maintenance: ' + redirect_route.redirectto)
-                return redirect(url_for('maint'))
-            else:
-                if redirect_route.embed:
-                    logger.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
-                    return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
+    global config_error
+    if config_error == False:
+        for redirect_route in dataread_records:
+            # Check to see if otherpath equals one of the redirect_route.redirectfrom configured paths
+            if otherpath == redirect_route.redirectfrom:
+                if redirect_route.maintenance:
+                    logger.info(request.remote_addr + ' ==> Maintenance: ' + redirect_route.redirectto)
+                    return redirect(url_for('maint'))
                 else:
-                    logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
-                    return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
-    logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
-    return render_template('error.html', bad_path=otherpath)
+                    if redirect_route.embed:
+                        logger.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
+                        return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
+                    else:
+                        logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
+                        return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
+        logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
+        return render_template('error.html', bad_path=otherpath)
+    else:
+        return redirect(url_for('errorpage'))
 
 # Status page
 @app.route('/status')
 def status():
-    logger.info(request.remote_addr + ' ==> Status page ')
-    running_python = sys.version.split('\n')
-    running_host = platform.node()
-    running_os = platform.system()
-    running_hardware = platform.machine()
-    try:
-        with open(config_file, 'r') as text_file:
-            config_data = text_file.read()
-    except IOError:
-        print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
-        config_data = "Unable to read config file " + config_file
-    try:
-        with open(log_file, 'r') as logging_file:
-            log_data = logging_file.read()
-    except IOError:
-        print('Problem opening ' + log_file + ', check to make sure your log file location is valid.')
-        log_data = "Unable to read log file " + log_file
-    return render_template('status.html', running_python=running_python, running_host=running_host, running_os=running_os, running_hardware=running_hardware, config_data=config_data, log_data=log_data)
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Status page ')
+        running_python = sys.version.split('\n')
+        running_host = platform.node()
+        running_os = platform.system()
+        running_hardware = platform.machine()
+        try:
+            with open(config_file, 'r') as text_file:
+                config_data = text_file.read()
+        except IOError:
+            print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+            config_data = "Unable to read config file " + config_file
+        try:
+            with open(log_file, 'r') as logging_file:
+                log_data = logging_file.read()
+        except IOError:
+            print('Problem opening ' + log_file + ', check to make sure your log file location is valid.')
+            log_data = "Unable to read log file " + log_file
+        return render_template('status.html', running_python=running_python, running_host=running_host, running_os=running_os, running_hardware=running_hardware, config_data=config_data, log_data=log_data)
+    else:
+        return redirect(url_for('errorpage'))
 
 # Run in debug mode if started from CLI
 if __name__ == '__main__':
