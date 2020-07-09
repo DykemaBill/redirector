@@ -252,69 +252,75 @@ def loginnewpage():
             user_request_pass = request.form['user_pass']
             logger.info(request.remote_addr + ' ==> Login create request ' + user_request_name)
             
-            # Find index to use for new user
-            user_last = redirector_users[-1]
-            user_last_index = user_last['_index']
-            user_index = user_last_index + 1
+            # Look to see if a user with the same login name already exists
+            user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
+            if user_check:
+                # Login name is already in use
+                logger.info(request.remote_addr + ' ==> Login name ' + user_request_name + ' already exists')
+                return render_template('loginnew.html', logintitle="Login name not available, try again")
+            else: # Login name not in use already
+                # Find index to use for new user
+                user_last = redirector_users[-1]
+                user_last_index = user_last['_index']
+                user_index = user_last_index + 1
 
-            # Encode password
-            user_passencoded_byte = b64encode(user_request_pass.encode("utf-8"))
-            user_passencoded = user_passencoded_byte.decode("utf-8")
+                # Encode password
+                user_passencoded_byte = b64encode(user_request_pass.encode("utf-8"))
+                user_passencoded = user_passencoded_byte.decode("utf-8")
 
-            # Write the new user for the config file
-            dataupdate_newuser = {
-                "_index": user_index,
-                "approved": False,
-                "name": user_request_name,
-                "password": user_passencoded
-            }
+                # Write the new user for the config file
+                dataupdate_newuser = {
+                    "_index": user_index,
+                    "approved": False,
+                    "name": user_request_name,
+                    "password": user_passencoded
+                }
 
-            # Read entire configuration file so that it can be updated
-            try:
-                with open(config_file, 'r') as json_file:
-                    dataupdate_json = json.load(json_file)
-            except IOError:
-                print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
-                logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
-                config_error = True
+                # Read entire configuration file so that it can be updated
+                try:
+                    with open(config_file, 'r') as json_file:
+                        dataupdate_json = json.load(json_file)
+                except IOError:
+                    print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                    logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                    config_error = True
 
-            # Create backup of configuration file
-            datetime = time.strftime("%Y-%m-%d_%H%M%S")
-            try:
-                with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
-                    json.dump(dataupdate_json, json_file, indent=4)
-            except IOError:
-                print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
-                logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
-                config_error = True
+                # Create backup of configuration file
+                datetime = time.strftime("%Y-%m-%d_%H%M%S")
+                try:
+                    with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
+                        json.dump(dataupdate_json, json_file, indent=4)
+                except IOError:
+                    print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                    logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                    config_error = True
 
-            # Add new user
-            redirector_users.append(dataupdate_newuser)
+                # Add new user
+                redirector_users.append(dataupdate_newuser)
 
-            # Assemble updated configuration file
-            configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': redirector_redirects, 'users': redirector_users}
+                # Assemble updated configuration file
+                configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': redirector_redirects, 'users': redirector_users}
 
-            # Write updated configuration file
-            try:
-                with open(config_file, 'w') as json_file:
-                    json.dump(configupdate_jsonedit, json_file, indent=4)
-            except IOError:
-                print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
-                logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
-                config_error = True
+                # Write updated configuration file
+                try:
+                    with open(config_file, 'w') as json_file:
+                        json.dump(configupdate_jsonedit, json_file, indent=4)
+                except IOError:
+                    print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                    logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                    config_error = True
 
-            # Write user info to log without encoded password
-            dataupdate_newuser_log = {
-                "_index": user_index,
-                "approved": False,
-                "name": user_request_name,
-                "password": "*******"
-            }
-            logger.info('Added user: ' + str(dataupdate_newuser_log))
+                # Write user info to log without encoded password
+                dataupdate_newuser_log = {
+                    "_index": user_index,
+                    "approved": False,
+                    "name": user_request_name,
+                    "password": "*******"
+                }
+                logger.info('Added user: ' + str(dataupdate_newuser_log))
 
-            # Let new user know they are added but not approved
-            return render_template('login.html', logintitle="New user " + user_request_name + " added, but not approved!")
-
+                # Let new user know they are added but not approved
+                return render_template('login.html', logintitle="New user " + user_request_name + " added, but not approved!")
         else:
             # Show login create page on initial GET request
             logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['name']))
