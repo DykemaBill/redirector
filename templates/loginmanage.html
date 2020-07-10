@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Redirector Server</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styling.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" media="all" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <!-- Created by Bill Dykema - https://github.com/DykemaBill
+    Copyright 2020 - https://mit-license.org -->
+    <script src="{{ url_for('static', filename='browsercheck.js') }}"></script>
+    <script src="{{ url_for('static', filename='config.js') }}"></script>
+
+    <font face="arial">
+    <div class="wrapper">
+
+            <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
+
+        <div>
+            
+            <center>
+                <H1>Redirector Server</H1>
+            
+                <h3><p>Date: <span id="datetime"></span></p>
+                <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
+                <h3>User: {{ g.user.name }} </h3>
+            </center>
+
+        </div>
+
+        <div>
+
+            <h2>Login Management</h2>
+
+            {% for login_record in login_records %}
+            <div class="formarea">
+
+                <form action="/loginmanage" method="post">
+                
+                Login: <input type="hidden" name="user_index" value="{{ login_record['_index'] }}" readonly>
+                {% if login_record['approved'] == True %}
+                <input type="text" value="{{ login_record['name'] }}" name="user_login" class="addr prod" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                <label class="addr select_yes checkbox" onclick="approvedClicked(this)"><input type="checkbox" name="user_approved" checked="checked">Approved</label><br><br>
+                {% else %}
+                <input type="text" value="{{ login_record['name'] }}" name="user_login" class="addr maint" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                <label class="addr select_no checkbox" onclick="approvedClicked(this)"><input type="checkbox" name="user_approved">Not Approved</label><br><br>
+                {% endif %}
+
+                <button class="addr saved" name="submit" value="save">Save</button>
+                <button class="addr del" name="submit" value="delete">Delete</button>
+
+                </form>
+            </div><br>
+            {% endfor %}
+
+        </div>
+
+        <div>
+
+            <h3>Contact the {{ g.team }} for questions at <a href="mailto: {{ g.email }}">Support</a></h3>
+
+        </div>
+
+    </div>
+    </font>
+</body>
+</html>

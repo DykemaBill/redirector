@@ -41,6 +41,23 @@ function embeddedClicked(element) {
 
 }
 
+// When approved button is clicked toggle
+function approvedClicked(element) {
+
+    // Toggle the embedded button
+    element.classList.toggle("select_no");
+    element.classList.toggle("select_yes");
+
+    // Enable the save button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+    // Disable the delete button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+}
+
 // When a maintenance button is clicked toggle
 function maintClicked(element) {
 

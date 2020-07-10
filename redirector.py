@@ -437,6 +437,117 @@ def save(redirectindex):
     else:
         return redirect(url_for('errorpage'))
 
+# Login management save
+@app.route('/loginmanage', methods=['GET', 'POST'])
+def loginmanage():
+    global config_error
+    if config_error == False:
+        if request.method == 'POST':
+            # Read modified login index
+            user_index = request.form['user_index']
+            # Read modified login name
+            user_name = request.form['user_login']
+            # Approved need try for checkbox to catch exception when it has no value
+            try:
+                request.form['user_approved']
+                user_approved = True
+            except:
+                user_approved = False
+
+            # TROUBLESHOOTING PRINT LINES
+            print ("Getting ready to get user_info...")
+            print ("redirector_users is: " + str(redirector_users))
+            print ("login modified index is " + str(user_index))
+            # Get encoded password for this user
+            # FOLLOWING LINE NOT WORKING
+            user_info = [user_record for user_record in redirector_users if user_record['_index'] == user_index][0]
+
+            print ("user_info is: " +  str(user_info))
+            user_passencoded = user_info['password']
+
+            # Write the login information for the config file
+            dataupdate_userchanged = {
+                "_index": user_index,
+                "approved": user_approved,
+                "name": user_name,
+                "password": user_passencoded
+            }
+
+            # Read entire configuration file so that it can be updated
+            try:
+                with open(config_file, 'r') as json_file:
+                    dataupdate_json = json.load(json_file)
+            except IOError:
+                print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                config_error = True
+
+            # Create backup of configuration file
+            datetime = time.strftime("%Y-%m-%d_%H%M%S")
+            try:
+                with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
+                    json.dump(dataupdate_json, json_file, indent=4)
+            except IOError:
+                print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                config_error = True
+
+            # Replace updated login, or delete login
+            dataupdate_jsonedit = []
+            for dataupdate_existinglogin in dataupdate_json['users']:
+                # Add all logins until we come to the one that was modified
+                if dataupdate_existinglogin['_index'] < user_index:
+                    dataupdate_jsonedit.append(dataupdate_existinglogin)
+                # This is the modified login
+                elif dataupdate_existinglogin['_index'] == user_index:
+                    # Check to see if we should replace it or delete/ignore it
+                    if request.form['submit'] == 'save':
+                        dataupdate_jsonedit.append(dataupdate_userchanged)
+                        logger.info(str(g.user['name']) + ' updated login: ' + str(dataupdate_userchanged))
+                    else:
+                        logger.info(str(g.user['name']) + ' deleted login: ' + str(dataupdate_userchanged))
+                # This is after the modified login
+                # If we saved the modified login, save the rest like normal
+                elif request.form['submit'] == 'save':
+                    dataupdate_jsonedit.append(dataupdate_existinglogin)
+                else: # Since we deleted the login, reduce the index
+                    curren_index = dataupdate_existinglogin['_index']
+                    dataupdate_existinglogin.update({"_index": curren_index-1})
+                    dataupdate_jsonedit.append(dataupdate_existinglogin)
+
+            # Assemble updated configuration file
+            configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': redirector_redirects, 'users': dataupdate_jsonedit}
+
+            # Write updated configuration file
+            try:
+                with open(config_file, 'w') as json_file:
+                    json.dump(configupdate_jsonedit, json_file, indent=4)
+            except IOError:
+                print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                config_error = True
+
+            # Write login modified to log
+            dataupdate_login_log = {
+                "_index": user_index,
+                "approved": user_approved,
+                "name": user_name,
+                "password": "*******"
+            }
+            logger.info('Modified user: ' + str(dataupdate_login_log))
+
+            # Reload configuration page
+            config_file_read()
+            return redirect(url_for('loginmanage'))
+
+        else:
+            # Show login management page on initial GET request
+            logger.info(request.remote_addr + ' ==> Login management page ' + str(g.user['name']))
+            return render_template('loginmanage.html', login_records=redirector_users)
+    
+    else:
+        return redirect(url_for('errorpage'))
+
 # Maintenance template page
 @app.route('/maint')
 def maint():
