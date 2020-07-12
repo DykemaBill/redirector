@@ -15,11 +15,12 @@ Lots still to-do:
 - Add page to request a new login where it creates the account unapproved - DONE
 - Add check when adding new user to make sure it does not already exist - DONE
 - Add page to approve, unapprove and delete logins - DONE
-- Add more user fields such as name and email and clean-up
+- Add more user fields such as name and email and clean-up - DONE
 - Move logo into header area instead of above it in all pages
 - Rename about page to landing page
 - Add redirect links list to landing page
 - Change login post redirect to go to landing page
+- Hash passwords rather than encoding them
 - Work on what happens if the configuration file cannot be found
 - Tighten-up login security
 - Add DB check for each redirect to provide a different response based on a field value

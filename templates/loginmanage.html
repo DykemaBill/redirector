@@ -27,7 +27,7 @@
             
                 <h3><p>Date: <span id="datetime"></span></p>
                 <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
-                <h3>User: {{ g.user.name }} </h3>
+                <h3>User: {{ g.user.login }} </h3>
             </center>
 
         </div>
@@ -43,15 +43,32 @@
                 
                 Login: <input type="hidden" name="user_index" value="{{ login_record['_index'] }}" readonly>
                 {% if login_record['approved'] == True %}
-                <input type="text" value="{{ login_record['name'] }}" name="user_login" class="addr prod" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                <input type="text" value="{{ login_record['login'] }}" name="user_login" class="addr prod" required style="text-align: left; width:9%" readonly>
+                Last: <input type="text" value="{{ login_record['namelast'] }}" name="user_namelast" class="addr prod" required style="text-align: left; width:12%" onclick="namelastClicked(this)">
+                First: <input type="text" value="{{ login_record['namefirst'] }}" name="user_namefirst" class="addr prod" required style="text-align: left; width:10%" onclick="namefirstClicked(this)">
+                Email: <input type="text" value="{{ login_record['email'] }}" name="user_email" class="addr prod" required style="text-align: left; width:24%" onclick="emailClicked(this)">
+                {% if login_record['login'] != g.user.login %}
                 <label class="addr select_yes checkbox" onclick="approvedClicked(this)"><input type="checkbox" name="user_approved" checked="checked">Approved</label><br><br>
                 {% else %}
-                <input type="text" value="{{ login_record['name'] }}" name="user_login" class="addr maint" required style="text-align: left; width:69%" onclick="fromClicked(this)">
+                <label class="addr select_yes checkbox"><input type="checkbox" name="user_approved" checked="checked" onclick="return false;">Approved</label><br><br>
+                {% endif %}
+
+                {% else %}
+
+                <input type="text" value="{{ login_record['login'] }}" name="user_login" class="addr maint" required style="text-align: left; width:9%" readonly>
+                Last: <input type="text" value="{{ login_record['namelast'] }}" name="user_namelast" class="addr maint" required style="text-align: left; width:12%" onclick="namelastClicked(this)">
+                First: <input type="text" value="{{ login_record['namefirst'] }}" name="user_namefirst" class="addr maint" required style="text-align: left; width:10%" onclick="namefirstClicked(this)">
+                Email: <input type="text" value="{{ login_record['email'] }}" name="user_email" class="addr maint" required style="text-align: left; width:24%" onclick="emailClicked(this)">
                 <label class="addr select_no checkbox" onclick="approvedClicked(this)"><input type="checkbox" name="user_approved">Not Approved</label><br><br>
                 {% endif %}
 
                 <button class="addr saved" name="submit" value="save">Save</button>
+                
+                {% if login_record['login'] != g.user.login %}
                 <button class="addr del" name="submit" value="delete">Delete</button>
+                {% else %}
+                <button class="addr dis" name="submit" value="delete" disabled>Delete</button>
+                {% endif %}
 
                 </form>
             </div><br>

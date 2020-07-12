@@ -64,6 +64,17 @@
   border-radius: 12px;
 }
 
+/* Login page */
+.login{
+  border: none;
+  color: white;
+  padding: 7px 10px;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  cursor: pointer;
+}
 /* Login grid */
 .loginrow{
   display: grid;

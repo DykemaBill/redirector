@@ -58,6 +58,45 @@ function approvedClicked(element) {
 
 }
 
+// When last name field is clicked toggle
+function namelastClicked(element) {
+
+    // Enable the save button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+    // Disable the delete button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+}
+
+// When first name field is clicked toggle
+function namefirstClicked(element) {
+
+    // Enable the save button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+    // Disable the delete button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+}
+
+// When email field is clicked toggle
+function emailClicked(element) {
+
+    // Enable the save button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("saved");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("save");
+
+    // Disable the delete button
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove("del");
+    element.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling.classList.add("dis");
+
+}
+
 // When a maintenance button is clicked toggle
 function maintClicked(element) {
 

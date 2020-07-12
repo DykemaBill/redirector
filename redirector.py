@@ -103,8 +103,11 @@ else: # Config settings out to the log
         redirect_users_record = {}
         redirect_users_record['_index'] = user_record['_index']
         redirect_users_record['approved'] = user_record['approved']
-        redirect_users_record['name'] = user_record['name']
+        redirect_users_record['login'] = user_record['login']
         redirect_users_record['password'] = "*******"
+        redirect_users_record['namelast'] = user_record['namelast']
+        redirect_users_record['namefirst'] = user_record['namefirst']
+        redirect_users_record['email'] = user_record['email']
         redirect_users_log.append(redirect_users_record)
     logger.info(redirect_users_log)
 
@@ -130,7 +133,7 @@ def before_request():
             g.email=redirector_email
         else: # User is a new or existing guest
             # Setup guest variables
-            user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+            user_guest = {"_index": 999999999999, "login": "guest", "password": "nopass"}
             if 'user_id' not in session:
                 # Create guest login session
                 session['user_id'] = user_guest['_index']
@@ -158,7 +161,7 @@ def about():
 def config():
     global config_error
     if config_error == False:
-        logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['name']))
+        logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['login']))
         if config_error == True:
             logger.info(request.remote_addr + ' ==> Config file read error ')
             return render_template('config_error.html', cfgfile=config_file)
@@ -177,13 +180,13 @@ def loginpage():
             # Clear any previous login session
             session.pop('user_id', None)
             # Process login after form is filled out and a POST request happens
-            user_request_name = request.form['user_login']
+            user_request_login = request.form['user_login']
             user_request_pass = request.form['user_pass']
             # Look to see if this is a valid user
-            user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
+            user_check = [user_record for user_record in redirector_users if user_record['login'] == user_request_login]
             if not user_check:
-                # Non-existent user name
-                logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' does not exist')
+                # Non-existent user login
+                logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' does not exist')
                 return render_template('login.html', logintitle="User does not exist, try again")
             else:
                 # Password is stored encoded, decoding it
@@ -191,10 +194,10 @@ def loginpage():
                 # Correct password
                 if password_decoded == user_request_pass:
                     # Check to make sure user is approved
-                    user_approved = [user_record for user_record in redirector_users if user_record['name'] == user_request_name and user_record['approved'] == True]
+                    user_approved = [user_record for user_record in redirector_users if user_record['login'] == user_request_login and user_record['approved'] == True]
                     if not user_approved:
                         # Login successful, but user not approved
-                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful, but not approved')
+                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_login + ' successful, but not approved')
                         return render_template('login.html', logintitle="Login successful, but not approved, check with your administrator")
                     else:
                         # Set session to logged in user
@@ -206,17 +209,17 @@ def loginpage():
                         g.team=redirector_team
                         g.email=redirector_email
                         # Redirect sucessfully logged in user to configuration page
-                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_name + ' successful')
+                        logger.info(request.remote_addr + ' ==> Login of ' + user_request_login + ' successful')
                         return redirect(url_for('config'))
                 else: # Incorrect password
-                    logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' bad password')
+                    logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' bad password')
                     return render_template('login.html', logintitle="Incorrect password, try again")
             # Login process failed all together
-            logger.info(request.remote_addr + ' ==> Login failed ' + user_request_name + ' unknown reason')
+            logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' unknown reason')
             return render_template('login.html', logintitle="Login attempt failed, try again")
         else:
             # Show login page on initial GET request
-            logger.info(request.remote_addr + ' ==> Login page ' + str(g.user['name']))
+            logger.info(request.remote_addr + ' ==> Login page ' + str(g.user['login']))
             return render_template('login.html', logintitle="Please login")
     else:
         return redirect(url_for('errorpage'))
@@ -226,11 +229,11 @@ def loginpage():
 def logoutpage():
     global config_error
     if config_error == False:
-        logger.info(request.remote_addr + ' ==> Logout page ' + str(g.user['name']))
+        logger.info(request.remote_addr + ' ==> Logout page ' + str(g.user['login']))
         # Clear login session
         session.pop('user_id', None)
         # Setup guest variables
-        user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+        user_guest = {"_index": 999999999999, "login": "guest", "password": "nopass"}
         # Create guest login session
         session['user_id'] = user_guest['_index']
         # Set global variables for guest
@@ -248,17 +251,21 @@ def loginnewpage():
     if config_error == False:
         if request.method == 'POST':
             # Process new login after form is filled out and a POST request happens
-            user_request_name = request.form['user_login']
+            user_request_login = request.form['user_login']
             user_request_pass = request.form['user_pass']
-            logger.info(request.remote_addr + ' ==> Login create request ' + user_request_name)
+            user_request_namelast = request.form['user_namelast']
+            user_request_namefirst = request.form['user_namefirst']
+            user_request_email = request.form['user_email']
+
+            logger.info(request.remote_addr + ' ==> Login create request ' + user_request_login + ", " + user_request_namefirst + " " + user_request_namelast + ", " + user_request_email)
             
-            # Look to see if a user with the same login name already exists
-            user_check = [user_record for user_record in redirector_users if user_record['name'] == user_request_name]
+            # Look to see if a user with the same login already exists
+            user_check = [user_record for user_record in redirector_users if user_record['login'] == user_request_login]
             if user_check:
-                # Login name is already in use
-                logger.info(request.remote_addr + ' ==> Login name ' + user_request_name + ' already exists')
+                # Login is already in use
+                logger.info(request.remote_addr + ' ==> Login name ' + user_request_login + ' already exists')
                 return render_template('loginnew.html', logintitle="Login name not available, try again")
-            else: # Login name not in use already
+            else: # Login not in use already
                 # Find index to use for new user
                 user_last = redirector_users[-1]
                 user_last_index = user_last['_index']
@@ -272,8 +279,11 @@ def loginnewpage():
                 dataupdate_newuser = {
                     "_index": user_index,
                     "approved": False,
-                    "name": user_request_name,
-                    "password": user_passencoded
+                    "login": user_request_login,
+                    "password": user_passencoded,
+                    "namelast": user_request_namelast,
+                    "namefirst": user_request_namefirst,
+                    "email": user_request_email
                 }
 
                 # Read entire configuration file so that it can be updated
@@ -314,20 +324,24 @@ def loginnewpage():
                 dataupdate_newuser_log = {
                     "_index": user_index,
                     "approved": False,
-                    "name": user_request_name,
-                    "password": "*******"
+                    "login": user_request_login,
+                    "password": "*******",
+                    "namelast": user_request_namelast,
+                    "namefirst": user_request_namefirst,
+                    "email": user_request_email
                 }
+
                 logger.info('Added user: ' + str(dataupdate_newuser_log))
 
                 # Let new user know they are added but not approved
-                return render_template('login.html', logintitle="New user " + user_request_name + " added, but not approved!")
+                return render_template('login.html', logintitle="New user " + user_request_login + " added, but not approved!")
         else:
             # Show login create page on initial GET request
-            logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['name']))
+            logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['login']))
             # Clear login session
             session.pop('user_id', None)
             # Setup guest variables
-            user_guest = {"_index": 999999999999, "name": "guest", "password": "nopass"}
+            user_guest = {"_index": 999999999999, "login": "guest", "password": "nopass"}
             # Create guest login session
             session['user_id'] = user_guest['_index']
             # Set global variables for guest
@@ -402,9 +416,9 @@ def save(redirectindex):
                     # Check to see if we should replace it or delete/ignore it
                     if request.form['submit'] == 'save':
                         dataupdate_jsonedit.append(dataupdate_newrecord)
-                        logger.info(str(g.user['name']) + ' updated redirect: ' + str(dataupdate_newrecord))
+                        logger.info(str(g.user['login']) + ' updated redirect: ' + str(dataupdate_newrecord))
                     else:
-                        logger.info(str(g.user['name']) + ' deleted redirect: ' + str(dataupdate_newrecord))
+                        logger.info(str(g.user['login']) + ' deleted redirect: ' + str(dataupdate_newrecord))
                 # This is after the modified record
                 # If we saved the modified record, save the rest like normal
                 elif request.form['submit'] == 'save':
@@ -415,7 +429,7 @@ def save(redirectindex):
                     dataupdate_jsonedit.append(dataupdate_existingrecord)
         else: # We are just adding a new record
             dataupdate_jsonedit = dataupdate_json['redirects']
-            logger.info(str(g.user['name']) + ' added redirect: ' + str(dataupdate_newrecord))
+            logger.info(str(g.user['login']) + ' added redirect: ' + str(dataupdate_newrecord))
             dataupdate_jsonedit.append(dataupdate_newrecord)
 
         # Assemble updated configuration file
@@ -446,10 +460,17 @@ def loginmanage():
             return redirect(url_for('loginpage'))
         else:
             if request.method == 'POST':
-                # Read modified login index
+                # Read user index
                 user_index = request.form['user_index']
-                # Read modified login name
-                user_name = request.form['user_login']
+                user_index = int(user_index)
+                # Read user login
+                user_login = request.form['user_login']
+                # Read user last name
+                user_namelast = request.form['user_namelast']
+                # Read user first name
+                user_namefirst = request.form['user_namefirst']
+                # Read user email address
+                user_email = request.form['user_email']
                 # Approved need try for checkbox to catch exception when it has no value
                 try:
                     request.form['user_approved']
@@ -469,16 +490,22 @@ def loginmanage():
                 dataupdate_userchanged = {
                     "_index": user_index,
                     "approved": user_approved,
-                    "name": user_name,
-                    "password": user_passencoded
+                    "login": user_login,
+                    "password": user_passencoded,
+                    "namelast": user_namelast,
+                    "namefirst": user_namefirst,
+                    "email": user_email
                 }
 
                 # Write the login information for the log file
                 dataupdate_login_log = {
                     "_index": user_index,
                     "approved": user_approved,
-                    "name": user_name,
-                    "password": "*******"
+                    "login": user_login,
+                    "password": "*******",
+                    "namelast": user_namelast,
+                    "namefirst": user_namefirst,
+                    "email": user_email
                 }
 
                 # Read entire configuration file so that it can be updated
@@ -511,9 +538,9 @@ def loginmanage():
                         # Check to see if we should replace it or delete/ignore it
                         if request.form['submit'] == 'save':
                             dataupdate_jsonedit.append(dataupdate_userchanged)
-                            logger.info(str(g.user['name']) + ' modified login: ' + str(dataupdate_login_log))
+                            logger.info(str(g.user['login']) + ' modified login: ' + str(dataupdate_login_log))
                         else:
-                            logger.info(str(g.user['name']) + ' deleted login: ' + str(dataupdate_login_log))
+                            logger.info(str(g.user['login']) + ' deleted login: ' + str(dataupdate_login_log))
                     # This is after the modified login
                     # If we saved the modified login, save the rest like normal
                     elif request.form['submit'] == 'save':
@@ -541,7 +568,7 @@ def loginmanage():
 
             else:
                 # Show login management page on initial GET request
-                logger.info(request.remote_addr + ' ==> Login management page ' + str(g.user['name']))
+                logger.info(request.remote_addr + ' ==> Login management page ' + str(g.user['login']))
                 return render_template('loginmanage.html', login_records=redirector_users)
     
     else:
