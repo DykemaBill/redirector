@@ -1,7 +1,7 @@
-# Default user password of Ch@ng3MEN0w! encoded as Q2hAbmczTUVOMHch in config file
+# Default user password of Ch@ng3MEN0w! for users in the config file
 
 from flask import Flask, g, render_template, json, redirect, url_for, request, session
-import logging, logging.handlers, time, platform, sys
+import logging, logging.handlers, time, platform, sys, bcrypt
 from base64 import b64encode, b64decode
 
 # Configuration file name
@@ -189,10 +189,16 @@ def loginpage():
                 logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' does not exist')
                 return render_template('login.html', logintitle="User does not exist, try again")
             else:
-                # Password is stored encoded, decoding it
-                password_decoded = b64decode(user_check[0]['password']).decode("utf-8")
+                # Get stored password
+                password_stored = user_check[0]['password']
+                # Get the salt previously used from the password field
+                password_stored_salt_decoded = password_stored.split('-')[0]
+                # Convert the previously used salt from its decoded state to a byte
+                password_stored_salt = password_stored_salt_decoded.encode("utf-8")
+                # Hash the entered password with previously used salt
+                password_entered = passhash(user_request_pass, password_stored_salt)
                 # Correct password
-                if password_decoded == user_request_pass:
+                if password_entered == password_stored:
                     # Check to make sure user is approved
                     user_approved = [user_record for user_record in redirector_users if user_record['login'] == user_request_login and user_record['approved'] == True]
                     if not user_approved:
@@ -271,16 +277,17 @@ def loginnewpage():
                 user_last_index = user_last['_index']
                 user_index = user_last_index + 1
 
-                # Encode password
-                user_passencoded_byte = b64encode(user_request_pass.encode("utf-8"))
-                user_passencoded = user_passencoded_byte.decode("utf-8")
+                # Generate a one-time salt for this password in byte format
+                pass_salt = bcrypt.gensalt()
+                # Hash password
+                user_pass_hash = passhash(user_request_pass, pass_salt)
 
                 # Write the new user for the config file
                 dataupdate_newuser = {
                     "_index": user_index,
                     "approved": False,
                     "login": user_request_login,
-                    "password": user_passencoded,
+                    "password": user_pass_hash,
                     "namelast": user_request_namelast,
                     "namefirst": user_request_namefirst,
                     "email": user_request_email
@@ -642,6 +649,19 @@ def status():
         return render_template('status.html', running_python=running_python, running_host=running_host, running_os=running_os, running_hardware=running_hardware, config_data=config_data, log_data=log_data)
     else:
         return redirect(url_for('errorpage'))
+
+def passhash(password, salt):
+    if password:
+        # Encode the password
+        pass_encoded = b64encode(password.encode("utf-8"))
+        # Create hash of the password using the salt
+        pass_hashed = bcrypt.hashpw(pass_encoded, salt)
+        # Decode salt and password hashed to make it easier to store
+        pass_salt_decoded = salt.decode("utf-8")
+        pass_hashed_decoded = pass_hashed.decode("utf-8")
+        # Combine them together
+        pass_to_store = pass_salt_decoded + "-" + pass_hashed_decoded
+        return pass_to_store
 
 # Run in debug mode if started from CLI
 if __name__ == '__main__':

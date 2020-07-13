@@ -16,7 +16,9 @@ Lots still to-do:
 - Add check when adding new user to make sure it does not already exist - DONE
 - Add page to approve, unapprove and delete logins - DONE
 - Add more user fields such as name and email and clean-up - DONE
-- Hash passwords rather than encoding them
+- Hash passwords rather than encoding them - DONE
+- If there are no stored logins, the first new one is automatically approved
+- Allow users to change their own password
 - Move logo into header area instead of above it in all pages
 - Rename about page to landing page
 - Add redirect links list to landing page
@@ -29,6 +31,7 @@ Lots still to-do:
 - Add navigation bar
 - CSS clean-up for better responsiveness, remove deprecated HTML and move to CSS
 - Fix problem where password special characters stored in config crashes decode process
+- Fix problem where user session is left logged in but is deleted from the config
 - Split configuration and startup items from redirect items into separate logs
 - Add prefix path checking that can direct to different targets for each configured redirect:
     Normal redirect: http://flaskserver:port/path/path -> http://someotherpath
