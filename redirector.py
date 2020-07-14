@@ -267,16 +267,22 @@ def loginnewpage():
             
             # Look to see if a user with the same login already exists
             user_check = [user_record for user_record in redirector_users if user_record['login'] == user_request_login]
+            user_approved = False
+            user_new_message = "but not approved!"
             if user_check:
                 # Login is already in use
                 logger.info(request.remote_addr + ' ==> Login name ' + user_request_login + ' already exists')
                 return render_template('loginnew.html', logintitle="Login name not available, try again")
             else: # Login not in use already
-                # Find index to use for new user
-                user_last = redirector_users[-1]
-                user_last_index = user_last['_index']
-                user_index = user_last_index + 1
-
+                if redirector_users: # There are existing users
+                    # Find index to use for new user
+                    user_last = redirector_users[-1]
+                    user_last_index = user_last['_index']
+                    user_index = user_last_index + 1
+                else: # There are no users yet
+                    user_index = 0
+                    user_approved = True
+                    user_new_message = "first user automatically approved!"
                 # Generate a one-time salt for this password in byte format
                 pass_salt = bcrypt.gensalt()
                 # Hash password
@@ -285,7 +291,7 @@ def loginnewpage():
                 # Write the new user for the config file
                 dataupdate_newuser = {
                     "_index": user_index,
-                    "approved": False,
+                    "approved": user_approved,
                     "login": user_request_login,
                     "password": user_pass_hash,
                     "namelast": user_request_namelast,
@@ -341,7 +347,7 @@ def loginnewpage():
                 logger.info('Added user: ' + str(dataupdate_newuser_log))
 
                 # Let new user know they are added but not approved
-                return render_template('login.html', logintitle="New user " + user_request_login + " added, but not approved!")
+                return render_template('login.html', logintitle="New user " + user_request_login + " added, " + user_new_message)
         else:
             # Show login create page on initial GET request
             logger.info(request.remote_addr + ' ==> Login create page ' + str(g.user['login']))

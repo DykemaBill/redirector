@@ -17,7 +17,7 @@ Lots still to-do:
 - Add page to approve, unapprove and delete logins - DONE
 - Add more user fields such as name and email and clean-up - DONE
 - Hash passwords rather than encoding them - DONE
-- If there are no stored logins, the first new one is automatically approved
+- First login is automatically approved - DONE
 - Allow users to change their own password
 - Move logo into header area instead of above it in all pages
 - Rename about page to landing page
