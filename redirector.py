@@ -146,13 +146,13 @@ def before_request():
     else:
         return redirect(url_for('errorpage'))
 
-# Root page about
+# Root landing page
 @app.route('/')
-def about():
+def landing():
     global config_error
     if config_error == False:
-        logger.info(request.remote_addr + ' ==> Root about page ')
-        return render_template('about.html')
+        logger.info(request.remote_addr + ' ==> Root landing page ')
+        return render_template('landing.html')
     else:
         return redirect(url_for('errorpage'))
 
@@ -216,7 +216,7 @@ def loginpage():
                         g.email=redirector_email
                         # Redirect sucessfully logged in user to configuration page
                         logger.info(request.remote_addr + ' ==> Login of ' + user_request_login + ' successful')
-                        return redirect(url_for('config'))
+                        return redirect(url_for('landing'))
                 else: # Incorrect password
                     logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' bad password')
                     return render_template('login.html', logintitle="Incorrect password, try again")
@@ -364,6 +364,67 @@ def loginnewpage():
             g.team=redirector_team
             g.email=redirector_email
             return render_template('loginnew.html', logintitle="Create a new login")
+    else:
+        return redirect(url_for('errorpage'))
+
+# Login password change
+@app.route('/loginpassword', methods=['GET', 'POST'])
+def loginpassword():
+    global config_error
+    if config_error == False:
+        if session['user_id'] == 999999999999: # User is a guest
+            return redirect(url_for('loginpage'))
+        else:
+            if request.method == 'POST':
+                # Process password change form when a POST request happens
+                # NEED TO BUILD THE PASSWORD CHANGE LOGIC FROM HERE ON
+                user_request_login = request.form['user_login']
+                user_request_pass = request.form['user_pass']
+                # Look to see if this is a valid user
+                user_check = [user_record for user_record in redirector_users if user_record['login'] == user_request_login]
+                if not user_check:
+                    # Non-existent user login
+                    logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' does not exist')
+                    return render_template('login.html', logintitle="User does not exist, try again")
+                else:
+                    # Get stored password
+                    password_stored = user_check[0]['password']
+                    # Get the salt previously used from the password field
+                    password_stored_salt_decoded = password_stored.split('-')[0]
+                    # Convert the previously used salt from its decoded state to a byte
+                    password_stored_salt = password_stored_salt_decoded.encode("utf-8")
+                    # Hash the entered password with previously used salt
+                    password_entered = passhash(user_request_pass, password_stored_salt)
+                    # Correct password
+                    if password_entered == password_stored:
+                        # Check to make sure user is approved
+                        user_approved = [user_record for user_record in redirector_users if user_record['login'] == user_request_login and user_record['approved'] == True]
+                        if not user_approved:
+                            # Login successful, but user not approved
+                            logger.info(request.remote_addr + ' ==> Login of ' + user_request_login + ' successful, but not approved')
+                            return render_template('login.html', logintitle="Login successful, but not approved, check with your administrator")
+                        else:
+                            # Set session to logged in user
+                            session['user_id'] = user_check[0]['_index']
+                            # Set global variables for user
+                            g.user = user_check[0]
+                            g.logo=redirector_logo
+                            g.logosize=redirector_logosize
+                            g.team=redirector_team
+                            g.email=redirector_email
+                            # Redirect sucessfully logged in user to configuration page
+                            logger.info(request.remote_addr + ' ==> Login of ' + user_request_login + ' successful')
+                            return redirect(url_for('config'))
+                    else: # Incorrect password
+                        logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' bad password')
+                        return render_template('login.html', logintitle="Incorrect password, try again")
+                # Login process failed all together
+                logger.info(request.remote_addr + ' ==> Login failed ' + user_request_login + ' unknown reason')
+                return render_template('login.html', logintitle="Login attempt failed, try again")
+            else:
+                # Show login password change page on initial GET request
+                logger.info(request.remote_addr + ' ==> Login password change ' + str(g.user['login']))
+                return render_template('loginpassword.html', logintitle="Change your password")
     else:
         return redirect(url_for('errorpage'))
 
