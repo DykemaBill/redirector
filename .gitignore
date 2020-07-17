@@ -2,3 +2,7 @@
 *_backup.*
 *_old.*
 .DS_Store
+*.ini
+wsgi.py
+env
+__pycache__
