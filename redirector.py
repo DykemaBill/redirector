@@ -127,10 +127,10 @@ def before_request():
             user_session = [user_record for user_record in redirector_users if user_record['_index'] == session['user_id']][0]
             # Set global variables for user
             g.user = user_session
-            g.logo=redirector_logo
-            g.logosize=redirector_logosize
-            g.team=redirector_team
-            g.email=redirector_email
+            g.logo = redirector_logo
+            g.logosize = redirector_logosize
+            g.team = redirector_team
+            g.email = redirector_email
         else: # User is a new or existing guest
             # Setup guest variables
             user_guest = {"_index": 999999999999, "login": "guest", "password": "nopass"}
@@ -139,10 +139,10 @@ def before_request():
                 session['user_id'] = user_guest['_index']
             # Set global variables for guest
             g.user = user_guest
-            g.logo=redirector_logo
-            g.logosize=redirector_logosize
-            g.team=redirector_team
-            g.email=redirector_email
+            g.logo = redirector_logo
+            g.logosize = redirector_logosize
+            g.team = redirector_team
+            g.email = redirector_email
     else:
         return redirect(url_for('errorpage'))
 
@@ -388,14 +388,14 @@ def loginpassword():
                 # Correct old password
                 if password_old_entered == g.user['password']:
                     # Change password to new one
-                    password_new_entered = passhash(user_request_passnew, password_salt)
+                    g.user['password'] = passhash(user_request_passnew, password_salt)
                     
                     # Write the login information for the config file
                     dataupdate_userchanged = {
                         "_index": g.user['_index'],
                         "approved": g.user['approved'],
                         "login": g.user['login'],
-                        "password": password_new_entered,
+                        "password": g.user['password'],
                         "namelast": g.user['namelast'],
                         "namefirst": g.user['namefirst'],
                         "email": g.user['email']
@@ -459,7 +459,6 @@ def loginpassword():
                         config_error = True
 
                     # Redirect sucessfully changed to main page
-                    logger.info(request.remote_addr + ' ==> Password of ' + str(g.user['login']) + ' changed')
                     return redirect(url_for('landing'))
                 else: # Incorrect password
                     logger.info(request.remote_addr + ' ==> Old password for ' + str(g.user['login']) + ' not correct')
