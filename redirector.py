@@ -394,7 +394,73 @@ def loginpassword():
                     # Change password to new one
                     password_new_entered = passhash(user_request_passnew, password_stored_salt)
                     
-                    # CODE TO CHANGE THE PASSWORD HERE
+                    # Write the login information for the config file
+                    dataupdate_userchanged = {
+                        "_index": g.user._index,
+                        "approved": g.user.approved,
+                        "login": g.user.login,
+                        "password": password_new_entered,
+                        "namelast": g.user.namelast,
+                        "namefirst": g.user.namefirst,
+                        "email": g.user.email
+                    }
+
+                    # Write the login information for the log file
+                    dataupdate_login_log = {
+                        "_index": g.user._index,
+                        "approved": g.user.approved,
+                        "login": g.user.login,
+                        "password": "*******",
+                        "namelast": g.user.namelast,
+                        "namefirst": g.user.namefirst,
+                        "email": g.user.email
+                    }
+
+                    # Read entire configuration file so that it can be updated
+                    try:
+                        with open(config_file, 'r') as json_file:
+                            dataupdate_json = json.load(json_file)
+                    except IOError:
+                        print('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                        logger.info('Problem opening ' + config_file + ', check to make sure your configuration file is not missing.')
+                        config_error = True
+
+                    # Create backup of configuration file
+                    datetime = time.strftime("%Y-%m-%d_%H%M%S")
+                    try:
+                        with open(config_name + '_' + datetime + '_old.cfg', 'w') as json_file:
+                            json.dump(dataupdate_json, json_file, indent=4)
+                    except IOError:
+                        print('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                        logger.info('Problem creating to ' + config_file + '_' + datetime + ', check to make sure your filesystem is not write protected.')
+                        config_error = True
+
+                    # Replace updated login
+                    dataupdate_jsonedit = []
+                    for dataupdate_existinglogin in dataupdate_json['users']:
+                        # Add all logins until we come to the one that was modified
+                        if int(dataupdate_existinglogin['_index']) < int(g.user._index):
+                            dataupdate_jsonedit.append(dataupdate_existinglogin)
+                        # This is the modified login
+                        elif int(dataupdate_existinglogin['_index']) == int(g.user._index):
+                            dataupdate_jsonedit.append(dataupdate_userchanged)
+                            logger.info(str(g.user['login']) + ' changed their password: ' + str(dataupdate_login_log))
+                        # This is after the modified login
+                        # If we saved the modified login, save the rest like normal
+                        else:
+                            dataupdate_jsonedit.append(dataupdate_existinglogin)
+
+                    # Assemble updated configuration file
+                    configupdate_jsonedit = {'email': redirector_email, 'logfilesize': redirector_logfilesize, 'logo': redirector_logo, 'logosize': redirector_logosize, 'team': redirector_team, 'redirects': redirector_redirects, 'users': dataupdate_jsonedit}
+
+                    # Write updated configuration file
+                    try:
+                        with open(config_file, 'w') as json_file:
+                            json.dump(configupdate_jsonedit, json_file, indent=4)
+                    except IOError:
+                        print('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                        logger.info('Problem writing to ' + config_file + ', check to make sure your configuration file is not write protected.')
+                        config_error = True
 
                     # Redirect sucessfully changed to main page
                     logger.info(request.remote_addr + ' ==> Password of ' + str(g.user['login']) + ' changed')
