@@ -191,9 +191,9 @@ def loginpage():
             else:
                 # Get stored password
                 password_stored = user_check[0]['password']
-                # Get the salt previously used from the password field
-                password_stored_salt_decoded = password_stored.split('-')[0]
-                # Convert the previously used salt from its decoded state to a byte
+                # Get the salt from first 29 characters of password stored
+                password_stored_salt_decoded = password_stored[:29]
+                # Convert the previously used salt to a byte
                 password_stored_salt = password_stored_salt_decoded.encode("utf-8")
                 # Hash the entered password with previously used salt
                 password_entered = passhash(user_request_pass, password_stored_salt)
@@ -379,41 +379,37 @@ def loginpassword():
                 # Process password change form when a POST request happens
                 user_request_passold = request.form['user_pass_old']
                 user_request_passnew = request.form['user_pass_new']
-                # Look to see what this users current password is
-                user_check = [user_record for user_record in redirector_users if user_record['login'] == g.user]
-                # Get stored password
-                password_stored = user_check[0]['password']
-                # Get the salt previously used from the password field
-                password_stored_salt_decoded = password_stored.split('-')[0]
-                # Convert the previously used salt from its decoded state to a byte
-                password_stored_salt = password_stored_salt_decoded.encode("utf-8")
-                # Hash the old password entered with previously used salt
-                password_old_entered = passhash(user_request_passold, password_stored_salt)
+                # Salt is first 29 characters of the stored password
+                password_salt_encoded = g.user['password'][:29]
+                # Convert the stored salt to a byte
+                password_salt = password_salt_encoded.encode("utf-8")
+                # Hash the old password entered with the salt
+                password_old_entered = passhash(user_request_passold, password_salt)
                 # Correct old password
-                if password_old_entered == password_stored:
+                if password_old_entered == g.user['password']:
                     # Change password to new one
-                    password_new_entered = passhash(user_request_passnew, password_stored_salt)
+                    password_new_entered = passhash(user_request_passnew, password_salt)
                     
                     # Write the login information for the config file
                     dataupdate_userchanged = {
-                        "_index": g.user._index,
-                        "approved": g.user.approved,
-                        "login": g.user.login,
+                        "_index": g.user['_index'],
+                        "approved": g.user['approved'],
+                        "login": g.user['login'],
                         "password": password_new_entered,
-                        "namelast": g.user.namelast,
-                        "namefirst": g.user.namefirst,
-                        "email": g.user.email
+                        "namelast": g.user['namelast'],
+                        "namefirst": g.user['namefirst'],
+                        "email": g.user['email']
                     }
 
                     # Write the login information for the log file
                     dataupdate_login_log = {
-                        "_index": g.user._index,
-                        "approved": g.user.approved,
-                        "login": g.user.login,
+                        "_index": g.user['_index'],
+                        "approved": g.user['approved'],
+                        "login": g.user['login'],
                         "password": "*******",
-                        "namelast": g.user.namelast,
-                        "namefirst": g.user.namefirst,
-                        "email": g.user.email
+                        "namelast": g.user['namelast'],
+                        "namefirst": g.user['namefirst'],
+                        "email": g.user['email']
                     }
 
                     # Read entire configuration file so that it can be updated
@@ -439,10 +435,10 @@ def loginpassword():
                     dataupdate_jsonedit = []
                     for dataupdate_existinglogin in dataupdate_json['users']:
                         # Add all logins until we come to the one that was modified
-                        if int(dataupdate_existinglogin['_index']) < int(g.user._index):
+                        if int(dataupdate_existinglogin['_index']) < int(g.user['_index']):
                             dataupdate_jsonedit.append(dataupdate_existinglogin)
                         # This is the modified login
-                        elif int(dataupdate_existinglogin['_index']) == int(g.user._index):
+                        elif int(dataupdate_existinglogin['_index']) == int(g.user['_index']):
                             dataupdate_jsonedit.append(dataupdate_userchanged)
                             logger.info(str(g.user['login']) + ' changed their password: ' + str(dataupdate_login_log))
                         # This is after the modified login
@@ -773,9 +769,8 @@ def passhash(password, salt):
         # Decode salt and password hashed to make it easier to store
         pass_salt_decoded = salt.decode("utf-8")
         pass_hashed_decoded = pass_hashed.decode("utf-8")
-        # Combine them together
-        pass_to_store = pass_salt_decoded + "-" + pass_hashed_decoded
-        return pass_to_store
+        # Return hash password, first 29 characters are the salt
+        return pass_hashed_decoded
 
 # Run in debug mode if started from CLI
 if __name__ == '__main__':
