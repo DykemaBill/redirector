@@ -13,36 +13,37 @@
     <!-- Created by Bill Dykema - https://github.com/DykemaBill
     Copyright 2020 - https://mit-license.org -->
     <script src="{{ url_for('static', filename='browsercheck.js') }}"></script>
-    <font face="arial">
-        <div class="wrapper">
-    
+
+    <div class="wrapper">
+
+        <!-- Header area here -->
+        <div class="header">
+
+            <div>
                 <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
-    
-            <div>
-                
-                <center>
-                    <H1>Redirector Server</H1>
-                
-                    <h3><p>Date: <span id="datetime"></span></p>
-                    <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
-                    <h3>{{ g.user.login }}</h3>
-                </center>
-    
             </div>
-    
-            <div>
-    
-                This server directs requests to the correct server.
-    
-            </div>
-    
-            <div>
-    
-                <h3>Contact the {{ g.team }} for questions at <a href="mailto: {{ g.email }}">Support</a></h3>
-    
-            </div>
-    
+
+            <H1>Redirector Server</H1>
+        
+            <h3><p>Date: <span id="datetime"></span></p>
+            <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
+            <h3>{{ g.user.login }}</h3>
+
         </div>
-    </font>
+
+        <div class="main">
+
+            This server directs requests to the correct server.
+
+        </div>
+
+        <div class="foot">
+
+            <h3>Contact the {{ g.team }} for questions at <a href="mailto: {{ g.email }}">Support</a></h3>
+
+        </div>
+
+    </div>
+
 </body>
 </html>

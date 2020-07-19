@@ -15,20 +15,20 @@
     <script src="{{ url_for('static', filename='browsercheck.js') }}"></script>
     <script src="{{ url_for('static', filename='config.js') }}"></script>
 
-    <font face="arial">
     <div class="wrapper">
 
-            <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
+        <!-- Header area here -->
+        <div class="header">
 
-        <div>
-            
-            <center>
-                <H1>Redirector Server</H1>
-            
-                <h3><p>Date: <span id="datetime"></span></p>
-                <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
-                <h3>User: {{ g.user.login }} </h3>
-            </center>
+            <div>
+                <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
+            </div>
+
+            <H1>Redirector Server</H1>
+        
+            <h3><p>Date: <span id="datetime"></span></p>
+            <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
+            <h3>User: {{ g.user.login }} </h3>
 
         </div>
 
@@ -76,13 +76,13 @@
 
         </div>
 
-        <div>
+        <div class="foot">
 
             <h3>Contact the {{ g.team }} for questions at <a href="mailto: {{ g.email }}">Support</a></h3>
 
         </div>
 
     </div>
-    </font>
+
 </body>
 </html>

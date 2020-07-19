@@ -12,33 +12,36 @@
 <body>
     <!-- Created by Bill Dykema - https://github.com/DykemaBill
     Copyright 2020 - https://mit-license.org -->
-    <font face="arial">
-        <div class="wrapper">
+
+    <div class="wrapper">
+
+        <!-- Header area here -->
+        <div class="header">
 
             <div>
-                
-                <center>
-                    <H1>Redirector Server</H1>
-                
-                    <h3><p>Date: <span id="datetime"></span></p>
-                    <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
-                </center>
-    
+                <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
             </div>
-    
-            <div class="description">
 
-                <a href="https://support.microsoft.com/en-us/help/17454/lifecycle-faq-internet-explorer-and-edge">Internet Explorer</a> is not supported for this site, you must use a modern web browser such as <a href="https://www.google.com/chrome">Chrome</a>, <a href="https://www.microsoft.com/en-us/edge">Edge Chromium</a>, <a href="https://www.mozilla.org/firefox">Firefox</a> or <a href="http://www.apple.com/safari">Safari</a>.
-    
-            </div>
-    
-            <div>
-    
-                <h3>Contact the {{ team }} for questions at <a href="mailto: {{ email }}">Support</a></h3>
-    
-            </div>
+            <H1>Redirector Server</H1>
+        
+            <h3><p>Date: <span id="datetime"></span></p>
+            <script>var dt = new Date(); document.getElementById("datetime").innerHTML=dt.toLocaleString();</script></h3>
     
         </div>
-    </font>
+    
+        <div class="main">
+
+            <a href="https://support.microsoft.com/en-us/help/17454/lifecycle-faq-internet-explorer-and-edge">Internet Explorer</a> is not supported for this site, you must use a modern web browser such as <a href="https://www.google.com/chrome">Chrome</a>, <a href="https://www.microsoft.com/en-us/edge">Edge Chromium</a>, <a href="https://www.mozilla.org/firefox">Firefox</a> or <a href="http://www.apple.com/safari">Safari</a>.
+
+        </div>
+
+        <div class="foot">
+
+            <h3>Contact the {{ team }} for questions at <a href="mailto: {{ email }}">Support</a></h3>
+
+        </div>
+    
+    </div>
+
 </body>
 </html>

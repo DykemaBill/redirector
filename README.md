@@ -19,19 +19,19 @@ Lots still to-do:
 - Hash passwords rather than encoding them - DONE
 - First login is automatically approved - DONE
 - Allow users to change their own password - DONE
-- Session timeout for logins default to 2 hours
-- Move logo into header area instead of above it in all pages
-- Rename about page to landing page
+- Session timeout for logins - DONE
+- Move logo into header area instead of above it in all pages - DONE
+- Rename about page to landing page - DONE
+- Change login post redirect to go to landing page - DONE
+- Work on what happens if the configuration file cannot be found - DONE
 - Add redirect links list to landing page
-- Change login post redirect to go to landing page
-- Work on what happens if the configuration file cannot be found
 - Tighten-up login security
-- Add DB check for each redirect to provide a different response based on a field value
+- Add DB check for redirects to provide a different response based on a field value
 - Add reorder arrows to config page
 - Add grouping option to config page
 - Add navigation bar
 - CSS clean-up for better responsiveness, remove deprecated HTML and move to CSS
-- Fix problem where password special characters stored in config crashes decode process
+- Fix problem where special characters stored in config crashes decode process
 - Fix problem where user session is left logged in but is deleted from the config
 - Split configuration and startup items from redirect items into separate logs
 - Add prefix path checking that can direct to different targets for each configured redirect:

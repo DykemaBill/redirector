@@ -1,6 +1,7 @@
 # Default user password of Ch@ng3MEN0w! for users in the config file
 
 from flask import Flask, g, render_template, json, redirect, url_for, request, session
+from datetime import timedelta
 import logging, logging.handlers, time, platform, sys, bcrypt
 from base64 import b64encode, b64decode
 
@@ -115,12 +116,16 @@ else: # Config settings out to the log
 app = Flask(__name__)
 # Add secret key since session requires it
 app.secret_key = 'redirector session top secret'
+# Set the length of time someone stays logged in
+app.permanent_session_lifetime = timedelta(hours=1)
 
 # Run first before all route calls
 @app.before_request
 def before_request():
     global config_error
     if config_error == False:
+        # Set the session to be saved by client in browser
+        session.permanent = True
         # Check to see if the end user already has an existing session
         if 'user_id' in session and session['user_id'] != 999999999999: # User session exists and it is not a guest
             # Find the user ID
@@ -155,6 +160,11 @@ def landing():
         return render_template('landing.html')
     else:
         return redirect(url_for('errorpage'))
+
+# Config error page
+@app.route('/error')
+def errorpage():
+    return render_template('config_error.html', cfgfile=config_file)
 
 # Configuration page
 @app.route('/config')
