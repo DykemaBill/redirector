@@ -41,7 +41,9 @@
     
                                 <p>Login<br><input type="login" class="login new" name="user_login" minlength="7" maxlength="17" required autofocus><span></span></p>
     
-                                <p>Password<br><input type="password" id="passfield" class="login new" name="user_pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{9,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 9 or more characters" required onclick="fromClicked()" onkeyup="fromType(this)"><span></span></p>
+                                <p>Password<br><input type="password" id="passfield" class="login new" name="user_pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{9,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 9 or more characters" required onclick="fromClicked()" onkeyup="fromType(this)" oninput="document.getElementById('passconffield').pattern = this.value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')"><span></span></p>
+
+                                <p>Password Confirm<br><input type="password" id="passconffield" class="login new" name="user_pass_conf" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{9,}" title="Passwords do not match" required><span></span></p>
 
                                 <p>First Name<br><input type="name" class="login new" name="user_namefirst" minlength="1" maxlength="50" required autofocus><span></span></p>
 

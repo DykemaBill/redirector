@@ -18,7 +18,7 @@ Lots still to-do:
 - Add more user fields such as name and email and clean-up - DONE
 - Hash passwords rather than encoding them - DONE
 - First login is automatically approved - DONE
-- Allow users to change their own password - Partially done
+- Allow users to change their own password - DONE
 - Session timeout for logins default to 2 hours
 - Move logo into header area instead of above it in all pages
 - Rename about page to landing page
