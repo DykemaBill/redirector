@@ -157,7 +157,7 @@ def landing():
     global config_error
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Root landing page ')
-        return render_template('landing.html')
+        return render_template('landing.html', redirect_records=dataread_records)
     else:
         return redirect(url_for('errorpage'))
 

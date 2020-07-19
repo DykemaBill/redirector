@@ -24,7 +24,8 @@ Lots still to-do:
 - Rename about page to landing page - DONE
 - Change login post redirect to go to landing page - DONE
 - Work on what happens if the configuration file cannot be found - DONE
-- Add redirect links list to landing page
+- Add redirect info to landing page - DONE
+- Add navigation menu to each page
 - Tighten-up login security
 - Add DB check for redirects to provide a different response based on a field value
 - Add reorder arrows to config page

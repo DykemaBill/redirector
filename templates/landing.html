@@ -31,11 +31,35 @@
 
         </div>
 
-        <div class="main">
+        <h2>Configured Redirects</h2>
 
-            This server directs requests to the correct server.
+        {% for redirectitem in redirect_records %}
+        <div class="formarea">
+            
+            {{ request.host_url }}
+            {% if redirectitem['maintenance'] == False %}
+            <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr prod" readonly style="text-align: left; width:60%">
+            {% else %}
+            <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr maint" readonly style="text-align: left; width:60%">
+            {% endif %}
+
+            {% if redirectitem['embed'] == False %}
+            <label class="addr select_no checkbox" name="redirectTargetEmbed">Embedded</label><br><br>
+            {% else %}
+            <label class="addr select_yes checkbox" name="redirectTargetEmbed" name="redirectTargetEmbed">Embedded</label><br><br>
+            {% endif %}
+
+            redirects to
+            {% if redirectitem['maintenance'] == False %}
+            <input type="text" value="{{ redirectitem['redirectto'] }}" name="redirectTargetInput" class="addr prod" readonly style="text-align: left; width:61%">
+            <label class="addr select_no checkbox" name="redirectTargetMaint">Maintenance</label>
+            {% else %}
+            <input type="text" value="{{ redirectitem['redirectto'] }}" name="redirectTargetInput" class="addr maint" readonly style="text-align: left; width:61%">
+            <label class="addr select_yes checkbox" name="redirectTargetMaint">Maintenance</label>
+            {% endif %}
 
         </div>
+        {% endfor %}
 
         <div class="foot">
 
