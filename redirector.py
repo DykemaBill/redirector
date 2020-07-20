@@ -172,9 +172,6 @@ def config():
     global config_error
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['login']))
-        if config_error == True:
-            logger.info(request.remote_addr + ' ==> Config file read error ')
-            return render_template('config_error.html', cfgfile=config_file)
         if session['user_id'] == 999999999999: # User is a guest
             return redirect(url_for('loginpage'))
         return render_template('config.html', redirect_records=dataread_records)
@@ -749,6 +746,8 @@ def status():
     global config_error
     if config_error == False:
         logger.info(request.remote_addr + ' ==> Status page ')
+        if session['user_id'] == 999999999999: # User is a guest
+            return redirect(url_for('loginpage'))
         running_python = sys.version.split('\n')
         running_host = platform.node()
         running_os = platform.system()
@@ -775,8 +774,7 @@ def passhash(password, salt):
         pass_encoded = b64encode(password.encode("utf-8"))
         # Create hash of the password using the salt
         pass_hashed = bcrypt.hashpw(pass_encoded, salt)
-        # Decode salt and password hashed to make it easier to store
-        pass_salt_decoded = salt.decode("utf-8")
+        # Decode password hashed to make it easier to store
         pass_hashed_decoded = pass_hashed.decode("utf-8")
         # Return hash password, first 29 characters are the salt
         return pass_hashed_decoded

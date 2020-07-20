@@ -1,9 +1,14 @@
 /* Page settings */
+
+body{
+  font-family: "Arial", Serif;
+  background-color: #f4f4f4;
+}
+
 .wrapper{
     display:grid;
     grid-template-columns: 100%;
     grid-gap:1em;
-    font-family: Arial;
   }
 .wrapper > div{
   background:#eee;
@@ -17,11 +22,62 @@
   padding: 1em;
   text-align: center;
 }
-.header > div{
+/* Logo in header */
+.header > div > img{
   position: absolute;
   left: 0px;
   width: 200px;
   padding: 1em;
+}
+
+/* Navigation */
+.burger-nav{
+  position: absolute;
+  overflow: hidden;
+  top: 1em;
+  left: 1em;
+}
+.burger-nav a{
+  float: left;
+  display: block;
+}
+.burger-nav a:hover{
+  background-color: rgb(255, 255, 255);
+}
+.side-nav{
+  height: 100%;
+  width: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  text-align: left;
+  background-color: rgb(60, 60, 60);
+  opacity: 0.9;
+  overflow-x: hidden;
+  padding-top: 60px;
+  transition: 0.5s;
+}
+
+.side-nav a{
+  padding: 10px 10px 10px 30px;
+  text-decoration: none;
+  font-size: 20px;
+  color: #ccc;
+  display: block;
+  transition: 0.3s;
+}
+
+.side-nav a:hover{
+  color: #fff;
+}
+
+.side-nav .btn-close{
+  position: absolute;
+  top: 0;
+  right: 22px;
+  font-size: 36px;
+  margin-left: 50px;
 }
 
 /* Main area */
@@ -41,6 +97,20 @@
   background:rgb(215, 215, 215);
   padding:1em;
   max-width: 1000px;
+}
+
+/* Log area */
+.log {
+  text-align: left;
+  white-space: pre-wrap;
+}
+.log > pre{
+  overflow-x: auto;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Config page */
