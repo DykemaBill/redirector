@@ -21,7 +21,7 @@ user_session = "Not logged in"
 
 # Class to read JSON configuration file
 class RedirectJSONtoArray:
-    def __init__(self, _index, redirectfrom, redirectto, embed, maintenance):
+    def __init__(self, _index, redirectfrom, redirectto, embed, maintenance, maintcheck, maintfunc):
         self._index = _index
         self.redirectfrom = redirectfrom
         self.redirectto = redirectto
