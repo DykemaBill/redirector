@@ -10,6 +10,9 @@ import redirectormssqlcheck as mssqlcheck
 config_name = 'redirector'
 config_file = config_name + '.cfg'
 
+# Decryption key for DB passwords
+decryption_key = 'VioletHold'
+
 # Set default configuration variables
 redirector_team = "needtosetteamname"
 redirector_email = "needtosetinconfig@nowhere.com"
