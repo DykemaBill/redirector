@@ -1,8 +1,17 @@
-# Redirector
+# redirector
 
-Python Flask server that redirects visitors to other web page URLs.
+Python Flask application that provides redirects from one URL to another with different configurable options
 
-Lots still to-do:
+# Description
+
+Server written in Python using Flask which provides configurable address redirection.  This application reads from a configuration file which can be used to customize the following:
+
+- Support email address for your page
+- Page logo for your organization
+- Redirect URLs and their settings
+- User accounts to manage redirects
+
+# To-Do's for the author
 
 - Configure favicon - DONE
 - Made log rolling - DONE
@@ -38,3 +47,9 @@ Lots still to-do:
     Normal redirect: http://flaskserver:port/path/path -> http://someotherpath
     Prefix option: http://flaskserver:port/prefix/path/path -> http://somedifferentpathorport
 - Test different configuration file write/read error scenarios
+
+# License
+
+[MIT License 2020](https://mit-license.org), [Bill Dykema](https://github.com/DykemaBill).
+
+![redirector_screenshot](https://github.com/DykemaBill/redirector/blob/master/redirectorSS.png)
