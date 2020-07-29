@@ -4,6 +4,7 @@ from flask import Flask, g, render_template, json, redirect, url_for, request, s
 from datetime import timedelta
 import logging, logging.handlers, time, platform, sys, bcrypt
 from base64 import b64encode, b64decode
+import redirectormssqlcheck as mssqlcheck
 
 # Configuration file name
 config_name = 'redirector'
@@ -744,14 +745,26 @@ def redirectfrom(otherpath):
         for redirect_route in dataread_records:
             # Check to see if otherpath equals one of the redirect_route.redirectfrom configured paths
             if otherpath == redirect_route.redirectfrom:
-                if redirect_route.maintenance:
+                if redirect_route.maintenance: # Show maintenance page
                     logger.info(request.remote_addr + ' ==> Maintenance: ' + redirect_route.redirectto)
                     return redirect(url_for('maint'))
                 else:
-                    if redirect_route.embed:
+                    # if redirect_route.maintcheck: # Database field check before redirect
+                    #     sqlserver = "sqlserver" # SQL Server name
+                    #     sqldb = "TestDB" # Database
+                    #     sqlschema = "test" # Schema (use dbo for default)
+                    #     sqltable = "Test" # Table
+                    #     sqlwhere = "NameLast" # Column/field name to filter on
+                    #     sqlwhereval = "Johnson" # Column/field value to filter on
+                    #     sqlcheck = "TestID" # Column/field name to check value of
+                    #     sqlcheckval = 3 # Column/field value to check for
+                    #     sqluser = "sa" # SQL user ID to use
+                    #     sqlpass = "*****" # SQL password to use
+                    #     dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
+                    if redirect_route.embed: # Use embedded method to keep the end-user path the same
                         logger.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
                         return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
-                    else:
+                    else: # Complete redirect to other site
                         logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
                         return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
         logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
