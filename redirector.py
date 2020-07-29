@@ -27,6 +27,8 @@ class RedirectJSONtoArray:
         self.redirectto = redirectto
         self.embed = embed
         self.maintenance = maintenance
+        self.maintcheck = maintcheck
+        self.maintfunc = maintfunc
 
 # Read configuration file for redirects
 config_error = False
@@ -165,18 +167,6 @@ def landing():
 @app.route('/error')
 def errorpage():
     return render_template('config_error.html', cfgfile=config_file)
-
-# Configuration page
-@app.route('/config')
-def config():
-    global config_error
-    if config_error == False:
-        logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['login']))
-        if session['user_id'] == 999999999999: # User is a guest
-            return redirect(url_for('loginpage'))
-        return render_template('config.html', redirect_records=dataread_records)
-    else:
-        return redirect(url_for('errorpage'))
 
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
@@ -477,6 +467,18 @@ def loginpassword():
     else:
         return redirect(url_for('errorpage'))
 
+# Configuration page
+@app.route('/config')
+def config():
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Config page user ' + str(g.user['login']))
+        if session['user_id'] == 999999999999: # User is a guest
+            return redirect(url_for('loginpage'))
+        return render_template('config.html', redirect_records=dataread_records)
+    else:
+        return redirect(url_for('errorpage'))
+
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):
@@ -505,8 +507,10 @@ def save(redirectindex):
             "redirectfrom" : redirectfromSave,
             "redirectto" : redirecttoSave,
             "embed" : embedSave,
-            "maintenance" : maintenanceSave
-        }
+            "maintenance" : maintenanceSave,
+            "maintcheck" : redirector_redirects[redirectindex]['maintcheck'],
+            "maintfunc" : redirector_redirects[redirectindex]['maintfunc']
+        } # THE ABOVE MAINTCHECK AND MAINTFUNC BREAK NEW REDIRECTS
 
         # Read entire configuration file so that it can be updated
         try:

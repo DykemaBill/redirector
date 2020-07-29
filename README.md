@@ -26,8 +26,8 @@ Lots still to-do:
 - Work on what happens if the configuration file cannot be found - DONE
 - Add redirect info to landing page - DONE
 - Add navigation menu to each page - DONE
+- Add DB check for redirects to provide response based on a field value - STARTED
 - Tighten-up login security
-- Add DB check for redirects to provide a different response based on a field value
 - Add reorder arrows to config page
 - Add grouping option to config page
 - CSS clean-up for better responsiveness, remove deprecated HTML and move to CSS
