@@ -501,16 +501,31 @@ def save(redirectindex):
         except:
             maintenanceSave = False
 
-        # Write the new record for the config file
-        dataupdate_newrecord = {
-            "_index": redirectindex,
-            "redirectfrom" : redirectfromSave,
-            "redirectto" : redirecttoSave,
-            "embed" : embedSave,
-            "maintenance" : maintenanceSave,
-            "maintcheck" : redirector_redirects[redirectindex]['maintcheck'],
-            "maintfunc" : redirector_redirects[redirectindex]['maintfunc']
-        } # THE ABOVE MAINTCHECK AND MAINTFUNC BREAK NEW REDIRECTS
+        # Write the new record for the config file, maintcheck and maintfunc not in the config GUI
+        if len(redirector_redirects) < redirectindex: # Existing redirect
+            dataupdate_newrecord = {
+                "_index": redirectindex,
+                "redirectfrom" : redirectfromSave,
+                "redirectto" : redirecttoSave,
+                "embed" : embedSave,
+                "maintenance" : maintenanceSave,
+                "maintcheck" : redirector_redirects[redirectindex]['maintcheck'],
+                "maintfunc" : redirector_redirects[redirectindex]['maintfunc']
+            }
+        else: # New redirect
+            dataupdate_newrecord = {
+                "_index": redirectindex,
+                "redirectfrom" : redirectfromSave,
+                "redirectto" : redirecttoSave,
+                "embed" : embedSave,
+                "maintenance" : maintenanceSave,
+                "maintcheck" : False,
+                "maintfunc" : [
+                    {
+                        "type": "none"
+                    }
+                ]
+            }
 
         # Read entire configuration file so that it can be updated
         try:
