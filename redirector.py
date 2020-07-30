@@ -11,7 +11,7 @@ config_name = 'redirector'
 config_file = config_name + '.cfg'
 
 # Decryption key for DB passwords
-decryption_key = 'VioletHold'
+decryption_key = '2_uUVgunK59ghEWlPjvmaeCFoDrWiPDzS7dGi7I7mO4='
 
 # Set default configuration variables
 redirector_team = "needtosetteamname"
