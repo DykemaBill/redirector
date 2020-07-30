@@ -739,7 +739,7 @@ def maint():
 def dbwait():
     global config_error
     if config_error == False:
-        logger.info(request.remote_addr + ' ==> DB wait ')
+        logger.info(request.remote_addr + ' ==> DB wait page ')
         return render_template('dbwait.html')
     else:
         return redirect(url_for('errorpage'))
@@ -766,18 +766,22 @@ def redirectfrom(otherpath):
                 if redirect_route.maintenance: # Show maintenance page
                     return redirect(url_for('maint'))
                 elif redirect_route.maintcheck: # Database field check before redirect
-                    sqlserver = redirect_route.maintfunc['sqlserver'] # SQL Server name
-                    sqldb = redirect_route.maintfunc['sqldb'] # Database
-                    sqlschema = redirect_route.maintfunc['sqlschema'] # Schema (use dbo for default)
-                    sqltable = redirect_route.maintfunc['sqltable'] # Table
-                    sqlwhere = redirect_route.maintfunc['sqlwhere'] # Column/field name to filter on
-                    sqlwhereval = redirect_route.maintfunc['sqlwhereval'] # Column/field value to filter on
-                    sqlcheck = redirect_route.maintfunc['sqlcheck'] # Column/field name to check value of
-                    sqlcheckval = redirect_route.maintfunc['sqlcheckval'] # Column/field value to check for
-                    sqluser = redirect_route.maintfunc['sqluser'] # SQL user ID to use
-                    sqlpass = redirect_route.maintfunc['sqlpass'] # SQL password to use
-                    dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
-                    logger.info(request.remote_addr + ' ==> DB check is ' + str(dbcheck) + ' looking at ' + str(sqlserver) + ':' + str(sqldb) + '.' + str(sqlschema) + '.' + str(sqltable) + ', filter for ' + str(sqlwhere) + '=' + str(sqlwhereval) + ' and check to see if ' + str(sqlcheck) + '=' + str(sqlcheckval))
+                    dbchecktype = redirect_route.maintfunc['type'] # Database check type
+                    if redirect_route.maintfunc['type'] == 'mssql':
+                        sqlserver = redirect_route.maintfunc['sqlserver'] # SQL Server name
+                        sqldb = redirect_route.maintfunc['sqldb'] # Database
+                        sqlschema = redirect_route.maintfunc['sqlschema'] # Schema (use dbo for default)
+                        sqltable = redirect_route.maintfunc['sqltable'] # Table
+                        sqlwhere = redirect_route.maintfunc['sqlwhere'] # Column/field name to filter on
+                        sqlwhereval = redirect_route.maintfunc['sqlwhereval'] # Column/field value to filter on
+                        sqlcheck = redirect_route.maintfunc['sqlcheck'] # Column/field name to check value of
+                        sqlcheckval = redirect_route.maintfunc['sqlcheckval'] # Column/field value to check for
+                        sqluser = redirect_route.maintfunc['sqluser'] # SQL user ID to use
+                        sqlpass = redirect_route.maintfunc['sqlpass'] # SQL password to use
+                        dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
+                        logger.info(request.remote_addr + ' ==> DB check is ' + str(dbcheck) + ' looking at ' + str(sqlserver) + ':' + str(sqldb) + '.' + str(sqlschema) + '.' + str(sqltable) + ', filter for ' + str(sqlwhere) + '=' + str(sqlwhereval) + ' and check to see if ' + str(sqlcheck) + '=' + str(sqlcheckval))
+                    else:
+                        logger.info(request.remote_addr + ' ==> DB check type of ' + str(dbchecktype) + ' does not exist, ignoring')
                 if dbcheck: # Check is true, show database wait page
                     return redirect(url_for('dbwait'))
                 elif redirect_route.embed: # Use embedded method to keep the end-user path the same
