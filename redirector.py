@@ -730,6 +730,16 @@ def maint():
     else:
         return redirect(url_for('errorpage'))
 
+# Database wait template page
+@app.route('/dbwait')
+def dbwait():
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> DB wait ')
+        return render_template('dbwait.html')
+    else:
+        return redirect(url_for('errorpage'))
+
 # IE notice page
 @app.route('/ienotice')
 def ienotice():
@@ -744,33 +754,35 @@ def ienotice():
 @app.route('/<path:otherpath>')
 def redirectfrom(otherpath):
     global config_error
+    dbcheck = False # Assume the database will not tell us to wait
     if config_error == False:
         for redirect_route in dataread_records:
             # Check to see if otherpath equals one of the redirect_route.redirectfrom configured paths
             if otherpath == redirect_route.redirectfrom:
                 if redirect_route.maintenance: # Show maintenance page
-                    logger.info(request.remote_addr + ' ==> Maintenance: ' + redirect_route.redirectto)
                     return redirect(url_for('maint'))
-                else:
-                    # if redirect_route.maintcheck: # Database field check before redirect
-                    #     sqlserver = "sqlserver" # SQL Server name
-                    #     sqldb = "TestDB" # Database
-                    #     sqlschema = "test" # Schema (use dbo for default)
-                    #     sqltable = "Test" # Table
-                    #     sqlwhere = "NameLast" # Column/field name to filter on
-                    #     sqlwhereval = "Johnson" # Column/field value to filter on
-                    #     sqlcheck = "TestID" # Column/field name to check value of
-                    #     sqlcheckval = 3 # Column/field value to check for
-                    #     sqluser = "sa" # SQL user ID to use
-                    #     sqlpass = "*****" # SQL password to use
-                    #     dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
-                    if redirect_route.embed: # Use embedded method to keep the end-user path the same
-                        logger.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
-                        return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
-                    else: # Complete redirect to other site
-                        logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
-                        return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
-        logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath)
+                elif redirect_route.maintcheck: # Database field check before redirect
+                    sqlserver = "sqlserver" # SQL Server name
+                    sqldb = "TestDB" # Database
+                    sqlschema = "test" # Schema (use dbo for default)
+                    sqltable = "Test" # Table
+                    sqlwhere = "NameLast" # Column/field name to filter on
+                    sqlwhereval = "Johnson" # Column/field value to filter on
+                    sqlcheck = "TestID" # Column/field name to check value of
+                    sqlcheckval = "2" # Column/field value to check for
+                    sqluser = "sa" # SQL user ID to use
+                    sqlpass = "gAAAAABfItxvPQigOIgyfD8vV1EUr9iZSlOgYJYN6fex6FTjslRVGuauzwiCSKnIlcfFrWP9vQwakiZILwIDFIOdAT7PjRbOSA==" # SQL password to use
+                    dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
+                    logger.info(request.remote_addr + ' ==> DB check is ' + str(dbcheck) + ' looking at ' + sqlserver + ':' + sqldb + '.' + sqlschema + '.' + sqltable + ', filter for ' + sqlwhere + '=' + sqlwhereval + ' and check to see if ' + sqlcheck + '=' + sqlcheckval)
+                if dbcheck: # Check is true, show database wait page
+                    return redirect(url_for('dbwait'))
+                elif redirect_route.embed: # Use embedded method to keep the end-user path the same
+                    logger.info(request.remote_addr + ' ==> Embedded: ' + redirect_route.redirectto)
+                    return render_template('redirect.html', redirectto=redirect_route.redirectto) # If the target allows opening the site in an iFrame
+                else: # Complete redirect to other site
+                    logger.info(request.remote_addr + ' ==> Direct: ' + redirect_route.redirectto)
+                    return redirect(redirect_route.redirectto, code=302) # Use this just to redirect to the site
+        logger.info(request.remote_addr + ' ==> Bad path page ' + otherpath) # Display error for a non-redirect path
         return render_template('error.html', bad_path=otherpath)
     else:
         return redirect(url_for('errorpage'))
