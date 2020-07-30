@@ -71,7 +71,6 @@ def check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck
     sqlresult = sqlcursor.fetchone()
     while sqlresult:
         if sqlresult[0]:
-            print("You wanted to know if " + sqlcheck + " equals " + sqlcheckval + " for " + sqlwhereval + ",", sqlcheck + " equals", sqlresult[0], "for " + sqlwhereval + ".")
             if int(sqlcheckval) == int(sqlresult[0]):
                 return True
             else:

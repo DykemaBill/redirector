@@ -49,19 +49,25 @@ def config_file_read():
             global redirector_email
             global redirector_redirects
             global redirector_users
+            # Read log file settings
             redirector_logfilesize.clear()
             redirector_logfilesize.append(cfg_data['logfilesize'][0])
             redirector_logfilesize.append(cfg_data['logfilesize'][1])
+            # Read logo settings
             redirector_logo = cfg_data['logo']
             redirector_logosize.clear()
             redirector_logosize.append(cfg_data['logosize'][0])
             redirector_logosize.append(cfg_data['logosize'][1])
+            # Read team description
             redirector_team = cfg_data['team']
+            # Read support email address
             redirector_email = cfg_data['email']
+            # Read redirects
             redirector_redirects.clear()
             for dataread_record in cfg_data['redirects']:
                 dataread_records.append(RedirectJSONtoArray(**dataread_record))
                 redirector_redirects.append(dataread_record)
+            # Read logins
             redirector_users.clear()
             for dataread_user in cfg_data['users']:
                 redirector_users.append(dataread_user)
@@ -524,11 +530,9 @@ def save(redirectindex):
                 "embed" : embedSave,
                 "maintenance" : maintenanceSave,
                 "maintcheck" : False,
-                "maintfunc" : [
-                    {
-                        "type": "none"
-                    }
-                ]
+                "maintfunc": {
+                    "type": "none"
+                },
             }
 
         # Read entire configuration file so that it can be updated
@@ -762,18 +766,18 @@ def redirectfrom(otherpath):
                 if redirect_route.maintenance: # Show maintenance page
                     return redirect(url_for('maint'))
                 elif redirect_route.maintcheck: # Database field check before redirect
-                    sqlserver = "sqlserver" # SQL Server name
-                    sqldb = "TestDB" # Database
-                    sqlschema = "test" # Schema (use dbo for default)
-                    sqltable = "Test" # Table
-                    sqlwhere = "NameLast" # Column/field name to filter on
-                    sqlwhereval = "Johnson" # Column/field value to filter on
-                    sqlcheck = "TestID" # Column/field name to check value of
-                    sqlcheckval = "2" # Column/field value to check for
-                    sqluser = "sa" # SQL user ID to use
-                    sqlpass = "gAAAAABfItxvPQigOIgyfD8vV1EUr9iZSlOgYJYN6fex6FTjslRVGuauzwiCSKnIlcfFrWP9vQwakiZILwIDFIOdAT7PjRbOSA==" # SQL password to use
+                    sqlserver = redirect_route.maintfunc['sqlserver'] # SQL Server name
+                    sqldb = redirect_route.maintfunc['sqldb'] # Database
+                    sqlschema = redirect_route.maintfunc['sqlschema'] # Schema (use dbo for default)
+                    sqltable = redirect_route.maintfunc['sqltable'] # Table
+                    sqlwhere = redirect_route.maintfunc['sqlwhere'] # Column/field name to filter on
+                    sqlwhereval = redirect_route.maintfunc['sqlwhereval'] # Column/field value to filter on
+                    sqlcheck = redirect_route.maintfunc['sqlcheck'] # Column/field name to check value of
+                    sqlcheckval = redirect_route.maintfunc['sqlcheckval'] # Column/field value to check for
+                    sqluser = redirect_route.maintfunc['sqluser'] # SQL user ID to use
+                    sqlpass = redirect_route.maintfunc['sqlpass'] # SQL password to use
                     dbcheck = mssqlcheck.check(sqlserver, sqldb, sqlschema, sqltable, sqlwhere, sqlwhereval, sqlcheck, sqlcheckval, sqluser, sqlpass)
-                    logger.info(request.remote_addr + ' ==> DB check is ' + str(dbcheck) + ' looking at ' + sqlserver + ':' + sqldb + '.' + sqlschema + '.' + sqltable + ', filter for ' + sqlwhere + '=' + sqlwhereval + ' and check to see if ' + sqlcheck + '=' + sqlcheckval)
+                    logger.info(request.remote_addr + ' ==> DB check is ' + str(dbcheck) + ' looking at ' + str(sqlserver) + ':' + str(sqldb) + '.' + str(sqlschema) + '.' + str(sqltable) + ', filter for ' + str(sqlwhere) + '=' + str(sqlwhereval) + ' and check to see if ' + str(sqlcheck) + '=' + str(sqlcheckval))
                 if dbcheck: # Check is true, show database wait page
                     return redirect(url_for('dbwait'))
                 elif redirect_route.embed: # Use embedded method to keep the end-user path the same
