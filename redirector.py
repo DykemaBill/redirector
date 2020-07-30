@@ -489,6 +489,19 @@ def config():
     else:
         return redirect(url_for('errorpage'))
 
+# Configuration maintenance check
+@app.route('/config/<int:redirectindex>')
+def configmaintcheck(redirectindex):
+    global config_error
+    if config_error == False:
+        logger.info(request.remote_addr + ' ==> Config maint check page user ' + str(g.user['login']))
+        if session['user_id'] == 999999999999: # User is a guest
+            return redirect(url_for('loginpage'))
+        return render_template('configmaintcheck.html', redirectitem=dataread_records[redirectindex])
+    else:
+        return redirect(url_for('errorpage'))
+
+# NEED TO WORK ON CONFIG ITEM PAGE AND HOW IT SAVES
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):

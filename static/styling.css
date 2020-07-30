@@ -160,6 +160,24 @@ body{
   background-color: rgb(183, 147, 90);
   border-radius: 12px;
 }
+.dbcheck{
+  border: none;
+  color: white;
+  padding: 7px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 12px;
+}
+.dbcheck_no{
+  color: rgb(190, 190, 190);
+  background-color: rgb(136, 123, 145);
+}
+.dbcheck_yes{
+  background-color: rgb(149, 101, 184);
+}
 
 /* Login page */
 .login{
