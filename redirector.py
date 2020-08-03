@@ -5,6 +5,7 @@ from datetime import timedelta
 import logging, logging.handlers, time, platform, sys, bcrypt
 from base64 import b64encode, b64decode
 import redirectormssqlcheck as mssqlcheck
+import redirectorencryptpass as encryptpass
 
 # Configuration file name
 config_name = 'redirector'
@@ -523,30 +524,64 @@ def save(redirectindex):
             maintenanceSave = True
         except:
             maintenanceSave = False
+        # Maintenance Check need try for checkbox to catch exception when it has no value
+        try:
+            request.form['redirectMaintCheck']
+            maintenanceCheck = True
+        except:
+            maintenanceCheck = False
+        # Read maintenance function type
+        maintFuncType = request.form['maintfunctype']
+        # Read maintenance SQL Server
+        maintFuncSQLServer = request.form['maintfuncsqlserver']
+        # Read maintenance SQL user ID
+        maintFuncSQLUser = request.form['maintfuncsqluser']
+        # Read maintenance SQL user password
+        maintFuncSQLPass = request.form['maintfuncsqlpass']
+        if maintFuncSQLPass == 'nopasschange':
+            # Keep existing password
+            #maintFuncSQLPass = dataread_records[redirectindex].maintfunc['sqlpass']
+            maintFuncSQLPass = dataread_records[redirectindex].maintfunc.get('sqlpass')
+        else:
+            # Encrypt new SQL password
+            maintFuncSQLPass = encryptpass.passencrypt(decryption_key, request.form['maintfuncsqlpass'])
+        # Read maintenance SQL database
+        maintFuncSQLDB = request.form['maintfuncsqldb']
+        # Read maintenance SQL schema
+        maintFuncSQLSchema = request.form['maintfuncsqlschema']
+        # Read maintenance SQL table
+        maintFuncSQLTable = request.form['maintfuncsqltable']
+        # Read maintenance SQL field name for filter
+        maintFuncSQLWhere = request.form['maintfuncsqlwhere']
+        # Read maintenance SQL field value for filter
+        maintFuncSQLWhereVal = request.form['maintfuncsqlwhereval']
+        # Read maintenance SQL field name for check
+        maintFuncSQLCheck = request.form['maintfuncsqlcheck']
+        # Read maintenance SQL field value for check
+        maintFuncSQLCheckVal = request.form['maintfuncsqlcheckval']
 
-        # Write the new record for the config file, maintcheck and maintfunc not in the config GUI
-        if len(redirector_redirects) < redirectindex: # Existing redirect
-            dataupdate_newrecord = {
-                "_index": redirectindex,
-                "redirectfrom" : redirectfromSave,
-                "redirectto" : redirecttoSave,
-                "embed" : embedSave,
-                "maintenance" : maintenanceSave,
-                "maintcheck" : redirector_redirects[redirectindex]['maintcheck'],
-                "maintfunc" : redirector_redirects[redirectindex]['maintfunc']
+        # Write the new record for the config file
+        dataupdate_newrecord = {
+            "_index": redirectindex,
+            "redirectfrom" : redirectfromSave,
+            "redirectto" : redirecttoSave,
+            "embed" : embedSave,
+            "maintenance" : maintenanceSave,
+            "maintcheck" : maintenanceCheck,
+            "maintfunc": {
+                "sqlcheck": maintFuncSQLCheck,
+                "sqlcheckval": maintFuncSQLCheckVal,
+                "sqldb": maintFuncSQLDB,
+                "sqlpass": maintFuncSQLPass,
+                "sqlschema": maintFuncSQLSchema,
+                "sqlserver": maintFuncSQLServer,
+                "sqltable": maintFuncSQLTable,
+                "sqluser": maintFuncSQLUser,
+                "sqlwhere": maintFuncSQLWhere,
+                "sqlwhereval": maintFuncSQLWhereVal,
+                "type": maintFuncType
             }
-        else: # New redirect
-            dataupdate_newrecord = {
-                "_index": redirectindex,
-                "redirectfrom" : redirectfromSave,
-                "redirectto" : redirecttoSave,
-                "embed" : embedSave,
-                "maintenance" : maintenanceSave,
-                "maintcheck" : False,
-                "maintfunc": {
-                    "type": "none"
-                },
-            }
+        }
 
         # Read entire configuration file so that it can be updated
         try:

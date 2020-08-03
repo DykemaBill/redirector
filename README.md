@@ -36,6 +36,7 @@ Server written in Python using Flask which provides configurable address redirec
 - Add redirect info to landing page - DONE
 - Add navigation menu to each page - DONE
 - Add DB check for redirects to provide response based on a field value - STARTED
+- DB check setup so a SQL connection failure allows page to load
 - Tighten-up login security
 - Add reorder arrows to config page
 - Add grouping option to config page
