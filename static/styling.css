@@ -179,6 +179,11 @@ body{
   background-color: rgb(149, 101, 184);
 }
 
+/* Config maintenance check area */
+.dbcheck_disabled{
+  color: rgb(180, 180, 180);
+}
+
 /* Login page */
 .login{
   border: none;

@@ -46,6 +46,7 @@
                 <img src="{{ g.logo }}" style="width:{{ g.logosize[0] }}px;height:{{ g.logosize[1] }}px;">
             </div>
 
+            <!-- Page Title -->
             <H1>Redirector Server</H1>
         
             <h3><p>Date: <span id="datetime"></span></p>
@@ -64,15 +65,15 @@
                 
                 {{ request.host_url }}
                 {% if redirectitem['maintenance'] == False %}
-                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr prod" required style="text-align: left; width:50%" onclick="fromClicked(this)">
+                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr prod" required style="text-align: left; width:50%" onclick="fromcheckClicked(this)">
                 {% else %}
-                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr maint" required style="text-align: left; width:50%" onclick="fromClicked(this)">
+                <input type="text" value="{{ redirectitem['redirectfrom'] }}" name="redirectSourceInput" class="addr maint" required style="text-align: left; width:50%" onclick="fromcheckClicked(this)">
                 {% endif %}
 
                 {% if redirectitem['embed'] == False %}
-                <label class="addr select_no checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed">Embedded</label><br><br>
+                <label class="addr select_no checkbox" onclick="embcheckClicked(this)"><input type="checkbox" name="redirectTargetEmbed">Embedded</label><br><br>
                 {% else %}
-                <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked" name="redirectTargetEmbed">Embedded</label><br><br>
+                <label class="addr select_yes checkbox" onclick="embcheckClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked" name="redirectTargetEmbed">Embedded</label><br><br>
                 {% endif %}
 
                 redirects to
@@ -84,22 +85,24 @@
                 <label class="addr select_yes checkbox" onclick="maintClicked(this)"><input type="checkbox" name="redirectTargetMaint" checked="checked">Maint</label>
                 {% endif %}
 
-                <p>
-                    {% if redirectitem['maintcheck'] == False %}
-                    <label class="dbcheck dbcheck_no"><input type="checkbox" name="redirectMaintCheck">Maint Check</label>
+                {% if redirectitem['maintcheck'] == False %}
+                <p class="dbcheck_disabled">
+                    <label class="dbcheck dbcheck_no" onclick="checkClicked(this)"><input type="checkbox" name="redirectMaintCheck">Maint Check</label>
                     maintenance function type: <input type="text" value="{{ redirectitem.maintfunc['type'] }}" name="maintfunctype" class="addr new" required style="text-align: left" size="5" readonly>
-                    <p>SQL Server name (and instance if needed): <input type="text" value="{{ redirectitem.maintfunc['sqlserver'] }}" name="maintfuncsqlserver" class="addr new" readonly style="text-align: left" size="43"></p>
-                    <p>SQL User ID: <input type="text" value="{{ redirectitem.maintfunc['sqluser'] }}" name="maintfuncsqluser" class="addr new" readonly style="text-align: left" size="12">
+                    <p class="dbcheck_disabled">SQL Server name (and instance if needed): <input type="text" value="{{ redirectitem.maintfunc['sqlserver'] }}" name="maintfuncsqlserver" class="addr new" readonly style="text-align: left" size="43"></p>
+                    <p class="dbcheck_disabled">SQL User ID: <input type="text" value="{{ redirectitem.maintfunc['sqluser'] }}" name="maintfuncsqluser" class="addr new" readonly style="text-align: left" size="12">
                     Password: <input type="password" value="nopasschange" name="maintfuncsqlpass" class="addr new" readonly style="text-align: left" size="43"></p>
-                    <p>Database: <input type="text" value="{{ redirectitem.maintfunc['sqldb'] }}" name="maintfuncsqldb" class="addr new" readonly style="text-align: left" size="20">
+                    <p class="dbcheck_disabled">Database: <input type="text" value="{{ redirectitem.maintfunc['sqldb'] }}" name="maintfuncsqldb" class="addr new" readonly style="text-align: left" size="20">
                     Schema: <input type="text" value="{{ redirectitem.maintfunc['sqlschema'] }}" name="maintfuncsqlschema" class="addr new" readonly style="text-align: left" size="10">
                     Table: <input type="text" value="{{ redirectitem.maintfunc['sqltable'] }}" name="maintfuncsqltable" class="addr new" readonly style="text-align: left" size="20"></p>
-                    <p>Filter Field: <input type="text" value="{{ redirectitem.maintfunc['sqlwhere'] }}" name="maintfuncsqlwhere" class="addr new" readonly style="text-align: left" size="19">
+                    <p class="dbcheck_disabled">Filter Field: <input type="text" value="{{ redirectitem.maintfunc['sqlwhere'] }}" name="maintfuncsqlwhere" class="addr new" readonly style="text-align: left" size="19">
                     Filter Value: <input type="text" value="{{ redirectitem.maintfunc['sqlwhereval'] }}" name="maintfuncsqlwhereval" class="addr new" readonly style="text-align: left" size="37"></p>
-                    <p>Check Field: <input type="text" value="{{ redirectitem.maintfunc['sqlcheck'] }}" name="maintfuncsqlcheck" class="addr new" readonly style="text-align: left" size="18">
+                    <p class="dbcheck_disabled">Check Field: <input type="text" value="{{ redirectitem.maintfunc['sqlcheck'] }}" name="maintfuncsqlcheck" class="addr new" readonly style="text-align: left" size="18">
                     Check Value: <input type="text" value="{{ redirectitem.maintfunc['sqlcheckval'] }}" name="maintfuncsqlcheckval" class="addr new" readonly style="text-align: left" size="36"></p>
-                    {% else %}
-                    <label class="dbcheck dbcheck_yes"><input type="checkbox" name="redirectMaintCheck" checked="checked">Maint Check</label>
+                </p>
+                {% else %}
+                <p>
+                    <label class="dbcheck dbcheck_yes" onclick="checkClicked(this)"><input type="checkbox" name="redirectMaintCheck" checked="checked">Maint Check</label>
                     maintenance function type: <input type="text" value="{{ redirectitem.maintfunc['type'] }}" name="maintfunctype" class="addr new" required style="text-align: left" size="5" readonly>
                     <p>SQL Server name (and instance if needed): <input type="text" value="{{ redirectitem.maintfunc['sqlserver'] }}" name="maintfuncsqlserver" class="addr new" required style="text-align: left" size="43"></p>
                     <p>SQL User ID: <input type="text" value="{{ redirectitem.maintfunc['sqluser'] }}" name="maintfuncsqluser" class="addr new" required style="text-align: left" size="12">
@@ -111,10 +114,10 @@
                     Filter Value: <input type="text" value="{{ redirectitem.maintfunc['sqlwhereval'] }}" name="maintfuncsqlwhereval" class="addr new" required style="text-align: left" size="37"></p>
                     <p>Check Field: <input type="text" value="{{ redirectitem.maintfunc['sqlcheck'] }}" name="maintfuncsqlcheck" class="addr new" required style="text-align: left" size="18">
                     Check Value: <input type="text" value="{{ redirectitem.maintfunc['sqlcheckval'] }}" name="maintfuncsqlcheckval" class="addr new" required style="text-align: left" size="36"></p>
-                    {% endif %}
                 </p>
+                {% endif %}
 
-                <button class="addr saved" name="submit" value="save">Save</button>
+                <button class="addr saved" id="savebutton" name="submit" value="save">Save</button>
 
                 </form>
             </div><br>

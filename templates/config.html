@@ -76,8 +76,8 @@
                 <label class="addr select_yes checkbox" onclick="embeddedClicked(this)"><input type="checkbox" name="redirectTargetEmbed" checked="checked" name="redirectTargetEmbed">Embedded</label><br><br>
                 {% endif %}
 
-                <button class="addr saved" name="submit" value="save">Save</button>
-                <button class="addr del" name="submit" value="delete">Delete</button>
+                <button class="addr saved" id="savebutton" name="submit" value="save">Save</button>
+                <button class="addr del" id="delbutton" name="submit" value="delete">Delete</button>
 
                 redirects to
                 {% if redirectitem['maintenance'] == False %}

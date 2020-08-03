@@ -121,3 +121,37 @@ function maintClicked(element) {
     element.previousElementSibling.previousElementSibling.classList.add("dis");
 
 }
+
+// When an check page from field is clicked toggle
+function fromcheckClicked(element) {
+
+    // Enable the save button
+    document.getElementById('savebutton').classList.remove("saved");
+    document.getElementById('savebutton').classList.add("save");
+
+}
+
+// When an check page embedded button is clicked toggle
+function embcheckClicked(element) {
+
+    // Toggle the embedded button
+    element.classList.toggle("select_no");
+    element.classList.toggle("select_yes");
+
+    // Enable the save button
+    document.getElementById('savebutton').classList.remove("saved");
+    document.getElementById('savebutton').classList.add("save");
+
+}
+
+// When a DB check button is clicked toggle
+function checkClicked(element) {
+
+    // Toggle the DB check button
+    element.classList.toggle("dbcheck_no");
+    element.classList.toggle("dbcheck_yes");
+
+    // Enable the save button
+    document.getElementById('savebutton').classList.remove("saved");
+    document.getElementById('savebutton').classList.add("save");
+}
