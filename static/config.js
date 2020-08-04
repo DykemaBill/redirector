@@ -123,7 +123,7 @@ function maintClicked(element) {
 }
 
 // When an check page from field is clicked toggle
-function fromcheckClicked(element) {
+function fromtocheckClicked(element) {
 
     // Enable the save button
     document.getElementById('savebutton').classList.remove("saved");
@@ -132,7 +132,7 @@ function fromcheckClicked(element) {
 }
 
 // When an check page embedded button is clicked toggle
-function embcheckClicked(element) {
+function embmaintcheckClicked(element) {
 
     // Toggle the embedded button
     element.classList.toggle("select_no");
@@ -154,4 +154,15 @@ function checkClicked(element) {
     // Enable the save button
     document.getElementById('savebutton').classList.remove("saved");
     document.getElementById('savebutton').classList.add("save");
+
+    // Toggle disabled text
+    let dbcheckdisabled = document.getElementsByClassName('dbcheck_disabled');
+    for (var i = 0; i < dbcheckdisabled.length; i++) {
+        dbcheckdisabled[i].classList.toggle("dbcheck_enabled")
+      }
+    let dbcheckenabled = document.getElementsByClassName('dbcheck_enabled');
+    for (var i = 0; i < dbcheckenabled.length; i++) {
+        dbcheckenabled[i].classList.toggle("dbcheck_disabled")
+      }
+
 }

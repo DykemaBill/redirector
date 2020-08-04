@@ -183,6 +183,9 @@ body{
 .dbcheck_disabled{
   color: rgb(180, 180, 180);
 }
+.dbcheck_enabled{
+  color: rgb(0, 0, 0);
+}
 
 /* Login page */
 .login{
