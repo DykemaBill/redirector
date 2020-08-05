@@ -26,8 +26,8 @@ body{
 .header > div > img{
   position: absolute;
   left: 0px;
-  width: 200px;
-  padding: 1em;
+  width: 300px;
+  padding: 2em;
 }
 
 /* Navigation */
