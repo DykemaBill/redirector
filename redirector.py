@@ -502,7 +502,6 @@ def configmaintcheck(redirectindex):
     else:
         return redirect(url_for('errorpage'))
 
-# NEED TO WORK ON CONFIG ITEM PAGE AND HOW IT SAVES
 # Configuration save
 @app.route('/save/<int:redirectindex>', methods=['POST'])
 def save(redirectindex):
@@ -530,36 +529,71 @@ def save(redirectindex):
             maintenanceCheck = True
         except:
             maintenanceCheck = False
+        
         # Read maintenance function type
-        maintFuncType = request.form['maintfunctype']
+        try:
+            maintFuncType = request.form['maintfunctype']
+        except:
+            maintFuncType = "none"
         # Read maintenance SQL Server
-        maintFuncSQLServer = request.form['maintfuncsqlserver']
+        try:
+            maintFuncSQLServer = request.form['maintfuncsqlserver']
+        except:
+            maintFuncSQLServer = ""
         # Read maintenance SQL user ID
-        maintFuncSQLUser = request.form['maintfuncsqluser']
+        try:
+            maintFuncSQLUser = request.form['maintfuncsqluser']
+        except:
+            maintFuncSQLUser = ""
         # Read maintenance SQL user password
-        maintFuncSQLPass = request.form['maintfuncsqlpass']
-        if maintFuncSQLPass == 'nopasschange':
-            # Keep existing password
-            #maintFuncSQLPass = dataread_records[redirectindex].maintfunc['sqlpass']
-            maintFuncSQLPass = dataread_records[redirectindex].maintfunc.get('sqlpass')
-        else:
-            # Encrypt new SQL password
-            maintFuncSQLPass = encryptpass.passencrypt(decryption_key, request.form['maintfuncsqlpass'])
+        try:
+            maintFuncSQLPass = request.form['maintfuncsqlpass']
+            if maintFuncSQLPass == 'nopasschange':
+                # Keep existing password
+                #maintFuncSQLPass = dataread_records[redirectindex].maintfunc['sqlpass']
+                maintFuncSQLPass = dataread_records[redirectindex].maintfunc.get('sqlpass')
+            else:
+                # Encrypt new SQL password
+                maintFuncSQLPass = encryptpass.passencrypt(decryption_key, request.form['maintfuncsqlpass'])
+        except:
+            maintFuncSQLPass = ""
         # Read maintenance SQL database
-        maintFuncSQLDB = request.form['maintfuncsqldb']
+        try:
+            maintFuncSQLDB = request.form['maintfuncsqldb']
+        except:
+            maintFuncSQLDB = ""
         # Read maintenance SQL schema
-        maintFuncSQLSchema = request.form['maintfuncsqlschema']
+        try:
+            maintFuncSQLSchema = request.form['maintfuncsqlschema']
+        except:
+            maintFuncSQLSchema = ""
         # Read maintenance SQL table
-        maintFuncSQLTable = request.form['maintfuncsqltable']
+        try:
+            maintFuncSQLTable = request.form['maintfuncsqltable']
+        except:
+            maintFuncSQLTable = ""
         # Read maintenance SQL field name for filter
-        maintFuncSQLWhere = request.form['maintfuncsqlwhere']
+        try:
+            maintFuncSQLWhere = request.form['maintfuncsqlwhere']
+        except:
+            maintFuncSQLWhere = ""
         # Read maintenance SQL field value for filter
-        maintFuncSQLWhereVal = request.form['maintfuncsqlwhereval']
+        try:
+            maintFuncSQLWhereVal = request.form['maintfuncsqlwhereval']
+        except:
+            maintFuncSQLWhereVal = ""
         # Read maintenance SQL field name for check
-        maintFuncSQLCheck = request.form['maintfuncsqlcheck']
+        try:
+            maintFuncSQLCheck = request.form['maintfuncsqlcheck']
+        except:
+            maintFuncSQLCheck = ""
         # Read maintenance SQL field value for check
-        maintFuncSQLCheckVal = request.form['maintfuncsqlcheckval']
+        try:
+            maintFuncSQLCheckVal = request.form['maintfuncsqlcheckval']
+        except:
+            maintFuncSQLCheckVal = ""
 
+        # NEED TO ADD LOGIC HERE NOT TO SAVE UNNEEDED FIELDS
         # Write the new record for the config file
         dataupdate_newrecord = {
             "_index": redirectindex,
